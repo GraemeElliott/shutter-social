@@ -1,11 +1,13 @@
 <script setup>
-import { defineProps, computed, toRef } from 'vue';
+import { defineProps, computed, toRef, reactive } from 'vue';
 import { useUserStore } from '../stores/users';
 import { useRoute } from 'vue-router';
 import { supabase } from '../supabase';
 
 const route = useRoute();
 const userStore = useUserStore();
+
+const userInfo = reactive(props.userInfo);
 
 const user = toRef(userStore, 'user');
 const { username: profileUsername } = route.params;
@@ -23,6 +25,7 @@ const followUser = async () => {
     follower_id: user.value.id,
     following_id: props.user.id,
   });
+  userInfo.followers++;
 };
 
 const unFollowUser = async () => {
@@ -32,6 +35,7 @@ const unFollowUser = async () => {
     .delete()
     .eq('follower_id', user.value.id)
     .eq('following_id', props.user.id);
+  userInfo.followers--;
 };
 </script>
 
