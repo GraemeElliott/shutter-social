@@ -12,6 +12,6 @@ const ProfileView = defineComponent({
 
 <template>
   <div>
-    <Profile />
+    <Profile :key="$route.params.username" />
   </div>
 </template>
