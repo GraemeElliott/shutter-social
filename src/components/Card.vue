@@ -1,5 +1,6 @@
 <script setup>
 import { defineComponent } from 'vue';
+const imagePath = import.meta.env.VITE_IMAGE_PATH;
 
 const Card = defineComponent({
   name: 'Card',
@@ -7,15 +8,9 @@ const Card = defineComponent({
     loading: false,
     selection: 1,
   }),
-
-  methods: {
-    reserve() {
-      this.loading = true;
-
-      setTimeout(() => (this.loading = false), 2000);
-    },
-  },
 });
+
+const props = defineProps(['post', 'loading']);
 </script>
 
 <template>
@@ -42,15 +37,13 @@ const Card = defineComponent({
     <v-img
       cover
       height="auto"
-      src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
+      :src="`${imagePath}${post.image_urls[0]}`"
     ></v-img>
 
     <v-divider class="mx-4 mb-1"></v-divider>
 
     <v-card-actions>
-      <v-btn color="deep-purple-lighten-2" variant="text" @click="reserve">
-        Reserve
-      </v-btn>
+      <div>{{ post.post_content }}</div>
     </v-card-actions>
   </v-card>
 </template>
