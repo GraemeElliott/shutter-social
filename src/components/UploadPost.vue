@@ -111,6 +111,7 @@ const submit = async () => {
     image_urls: imageUrls,
     post_content: postContentValue.value,
     profile_id: user.value.id,
+    profile_username: user.value.username,
   });
 
   if (newPost.error) {

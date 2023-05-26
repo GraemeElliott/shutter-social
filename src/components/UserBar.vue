@@ -23,7 +23,9 @@ const followUser = async () => {
   props.updateIsFollowing(true);
   await supabase.from('followers_following').insert({
     follower_id: user.value.id,
+    follower_username: user.value.username,
     following_id: props.user.id,
+    following_username: props.user.username,
   });
   userInfo.followers++;
 };
