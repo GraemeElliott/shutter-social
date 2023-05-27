@@ -3,6 +3,8 @@ import { defineProps, computed, toRef, reactive } from 'vue';
 import { useUserStore } from '../stores/users';
 import { useRoute } from 'vue-router';
 import { supabase } from '../supabase';
+import EditProfile from '../components/EditProfile.vue';
+const imagePath = import.meta.env.VITE_IMAGE_PATH;
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -43,11 +45,24 @@ const unFollowUser = async () => {
 
 <template>
   <v-container class="userbar-container" v-if="props.user">
+    <v-img
+      :key="props.user.id"
+      :src="`${imagePath}${props.user.avatar}`"
+      width="150"
+      height="150"
+      aspect-ratio="1/1"
+      cover
+      class="profile-avatar"
+    >
+    </v-img>
     <div>{{ props.user.username }}</div>
     <div v-if="props.userInfo">
       <h2>{{ props.userInfo.posts }} Posts</h2>
       <h2>{{ props.userInfo.followers }} Followers</h2>
       <h2>{{ props.userInfo.following }} Following</h2>
+    </div>
+    <div v-if="user.username === props.user.username">
+      <EditProfile :user="user" />
     </div>
   </v-container>
 
@@ -65,4 +80,8 @@ const unFollowUser = async () => {
   </v-container>
 </template>
 
-<style scoped></style>
+<style scoped>
+.profile-avatar {
+  border-radius: 50%;
+}
+</style>

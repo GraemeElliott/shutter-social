@@ -1,11 +1,14 @@
 <script setup>
 import { defineComponent, onMounted, watch, ref, computed } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 import { useUserStore } from '../stores/users';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { storeToRefs } from 'pinia';
 import { supabase } from '../supabase';
 const imagePath = import.meta.env.VITE_IMAGE_PATH;
+
+const router = useRouter();
 
 const likedPost = ref(false);
 const updateLikeButton = (like) => {
@@ -30,7 +33,13 @@ const Card = defineComponent({
   }),
 });
 
-const props = defineProps(['post', 'user', 'loading']);
+const props = defineProps([
+  'post',
+  'user',
+  'loading',
+  'profileUsername',
+  'profileAvatar',
+]);
 
 const likePost = async () => {
   updateLikeButton(true);
@@ -133,7 +142,18 @@ onMounted(() => {
     </template>
 
     <v-card-item>
-      <v-card-title>{{ post.profile_username }}</v-card-title>
+      <v-img
+        :src="`${imagePath}${profileAvatar}`"
+        width="40"
+        height="40"
+        aspect-ratio="1/1"
+        cover
+        class="profile-avatar"
+      >
+      </v-img>
+      <RouterLink :to="`/profile/${profileUsername}`">
+        <v-card-title>{{ profileUsername }}</v-card-title>
+      </RouterLink>
 
       <v-card-subtitle>
         <span class="me-1">{{ dayjs(post.created_at).fromNow() }}</span>
@@ -180,6 +200,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.profile-avatar {
+  border-radius: 50%;
+}
 .card-icons {
   display: flex;
 }

@@ -18,6 +18,23 @@ const Timeline = defineComponent({
   },
 });
 
+const fetchPostUsernames = async () => {
+  const profileIds = posts.value.map((post) => post.profile_id);
+
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, username, avatar')
+    .in('id', profileIds);
+
+  posts.value.forEach((post) => {
+    const user = users.find((u) => u.id === post.profile_id);
+    if (user) {
+      post.profile_username = user.username;
+      post.profile_avatar = user.avatar;
+    }
+  });
+};
+
 const fetchData = async () => {
   if (user.value && user.value.id) {
     const { data: followingIds } = await supabase
@@ -37,6 +54,8 @@ const fetchData = async () => {
       .limit(50);
 
     posts.value = data;
+
+    await fetchPostUsernames();
   }
 };
 
@@ -58,6 +77,8 @@ onMounted(() => {
       :post="post"
       :user="user"
       :loadingUser="loadingUser"
+      :profileUsername="post.profile_username"
+      :profileAvatar="post.profile_avatar"
     />
     <div v-else>
       <h1>You must be logged in to view content</h1>
