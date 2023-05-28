@@ -46,14 +46,25 @@ const fetchData = async () => {
       (followingUser) => followingUser.following_id
     );
 
-    const { data } = await supabase
+    // Fetch posts from followed users
+    const { data: followedUsersPosts } = await supabase
       .from('posts')
       .select()
       .in('profile_id', owner_profile_ids)
       .order('created_at', { ascending: false })
       .limit(50);
 
-    posts.value = data;
+    // Fetch user's own posts
+    const { data: userPosts } = await supabase
+      .from('posts')
+      .select()
+      .eq('profile_id', user.value.id)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    posts.value = [...followedUsersPosts, ...userPosts].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
 
     await fetchPostUsernames();
   }

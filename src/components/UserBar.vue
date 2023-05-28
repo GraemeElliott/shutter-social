@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, computed, toRef, reactive } from 'vue';
+import { toRef, reactive } from 'vue';
 import { useUserStore } from '../stores/users';
 import { useRoute } from 'vue-router';
 import { supabase } from '../supabase';
