@@ -15,6 +15,11 @@ const router = createRouter({
       name: 'profile',
       component: ProfileView,
     },
+    {
+      path: '/tags/:tagname',
+      name: 'tags',
+      component: HomeView,
+    },
   ],
 });
 

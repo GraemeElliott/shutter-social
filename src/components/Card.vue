@@ -118,6 +118,21 @@ const formattedLikesCount = computed(() => {
   }
 });
 
+const formatPostContent = (content) => {
+  if (!content) {
+    return '';
+  }
+
+  const hashtagRegex = /#(\w+)/g;
+  const mentionRegex = /@(\w+)/g;
+
+  const replacedContent = content
+    .replace(hashtagRegex, '<a href="/tags/$1">#$1</a>')
+    .replace(mentionRegex, '<a href="/profile/$1">@$1</a>');
+
+  return replacedContent;
+};
+
 watch(user, () => {
   fetchLikedPosts();
   fetchSavedPosts();
@@ -193,7 +208,7 @@ onMounted(() => {
     <v-card-text>
       <div>
         <span class="post-username">{{ post.profile_username }}</span>
-        {{ post.post_content }}
+        <div v-html="formatPostContent(post.post_content)"></div>
       </div>
     </v-card-text>
   </v-card>

@@ -22,6 +22,9 @@ const onSearch = () => {
 const handleLogOut = async () => {
   await userStore.handleLogout();
 };
+const navigateToRoot = () => {
+  router.push('/');
+};
 </script>
 
 <template>
@@ -29,7 +32,7 @@ const handleLogOut = async () => {
     class="nav-container md:flex justify-between items-center w-full md:w-auto md:order-1"
   >
     <VContainer class="items-center py-4 px-2">
-      <RouterLink to="/">Shutter Social</RouterLink>
+      <a href="/" @click="navigateToRoot">Shutter Social</a>
     </VContainer>
     <VContainer>
       <VCard class="mx-auto" color="grey-lighten-3" max-width="900">

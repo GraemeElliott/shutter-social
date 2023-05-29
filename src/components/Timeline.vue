@@ -4,12 +4,15 @@ import Card from './Card.vue';
 import { useUserStore } from '../stores/users';
 import { storeToRefs } from 'pinia';
 import { supabase } from '../supabase';
+import { RouterLink, useRouter } from 'vue-router';
 
 const userStore = useUserStore();
 
 const { user, loadingUser } = storeToRefs(userStore);
 
 const posts = ref([]);
+
+const router = useRouter();
 
 const Timeline = defineComponent({
   name: 'Timeline',
@@ -32,41 +35,60 @@ const fetchPostUsernames = async () => {
       post.profile_username = user.username;
       post.profile_avatar = user.avatar;
     }
+    if (post.profile_avatar) {
+      post.profile_avatar_url = `https://rvjzuxzmskcedxpwkuae.supabase.co/storage/v1/object/${post.profile_avatar}`;
+    }
   });
 };
 
 const fetchData = async () => {
   if (user.value && user.value.id) {
-    const { data: followingIds } = await supabase
-      .from('followers_following')
-      .select('following_id')
-      .eq('follower_id', user.value.id);
+    if (router.currentRoute.value.path.includes('/tags/')) {
+      const tagname = router.currentRoute.value.params.tagname;
+      posts.value = [];
 
-    const owner_profile_ids = followingIds.map(
-      (followingUser) => followingUser.following_id
-    );
+      // Fetch posts with the specified tag
+      const { data: taggedPosts } = await supabase
+        .from('posts')
+        .select()
+        .ilike('post_content', `%#${tagname}%`)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    // Fetch posts from followed users
-    const { data: followedUsersPosts } = await supabase
-      .from('posts')
-      .select()
-      .in('profile_id', owner_profile_ids)
-      .order('created_at', { ascending: false })
-      .limit(50);
+      posts.value = taggedPosts;
+      await fetchPostUsernames();
+    } else {
+      const { data: followingIds } = await supabase
+        .from('followers_following')
+        .select('following_id')
+        .eq('follower_id', user.value.id);
 
-    // Fetch user's own posts
-    const { data: userPosts } = await supabase
-      .from('posts')
-      .select()
-      .eq('profile_id', user.value.id)
-      .order('created_at', { ascending: false })
-      .limit(50);
+      const owner_profile_ids = followingIds.map(
+        (followingUser) => followingUser.following_id
+      );
 
-    posts.value = [...followedUsersPosts, ...userPosts].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
+      // Fetch posts from followed users
+      const { data: followedUsersPosts } = await supabase
+        .from('posts')
+        .select()
+        .in('profile_id', owner_profile_ids)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-    await fetchPostUsernames();
+      // Fetch user's own posts
+      const { data: userPosts } = await supabase
+        .from('posts')
+        .select()
+        .eq('profile_id', user.value.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+
+      posts.value = [...followedUsersPosts, ...userPosts].sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      await fetchPostUsernames();
+    }
   }
 };
 
