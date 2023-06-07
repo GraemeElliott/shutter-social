@@ -44,7 +44,7 @@ const unFollowUser = async () => {
 </script>
 
 <template>
-  <v-container class="userbar-container" v-if="props.user">
+  <div class="userbar-container" v-if="props.user">
     <v-img
       :key="props.user.id"
       :src="`${imagePath}${props.user.avatar}`"
@@ -64,20 +64,20 @@ const unFollowUser = async () => {
     <div v-if="user.username === props.user.username">
       <EditProfile :user="user" />
     </div>
-  </v-container>
+  </div>
 
-  <v-container class="userbar-container" v-else>
+  <div class="userbar-container" v-else>
     <div>User not found.</div>
-  </v-container>
+  </div>
 
-  <v-container v-if="user">
+  <div v-if="user">
     <div v-if="user.username !== profileUsername">
       <div>
         <v-btn v-if="!props.isFollowing" @click="followUser">Follow</v-btn>
         <v-btn v-else @click="unFollowUser">Unfollow</v-btn>
       </div>
     </div>
-  </v-container>
+  </div>
 </template>
 
 <style scoped>

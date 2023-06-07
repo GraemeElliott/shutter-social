@@ -1,7 +1,7 @@
 <script setup>
 import { ref, reactive } from 'vue';
 import { useForm } from 'vee-validate';
-import { useUserStore } from '../stores/users';
+import { useUserStore } from '../../stores/users';
 import { storeToRefs } from 'pinia';
 
 const userStore = useUserStore();
@@ -55,7 +55,9 @@ const props = defineProps({
     {{ user }}
     <v-dialog v-model="dialog" persistent width="1024">
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props"> {{ isLogin ? 'Login' : 'Sign Up' }} </v-btn>
+        <v-btn v-bind="props" rounded="0">
+          {{ isLogin ? 'Login' : 'Sign Up' }}
+        </v-btn>
       </template>
       <v-card style="padding: 50px">
         <form @submit.prevent="submit">
@@ -83,10 +85,15 @@ const props = defineProps({
             ></v-progress-circular>
           </div>
           <v-alert v-if="errorMessage" type="error">{{ errorMessage }}</v-alert>
-          <v-btn class="me-4" type="submit" :disabled="loading"> Submit </v-btn>
-          <v-btn @click="handleClear"> Clear </v-btn>
-          <!-- Call resetForm instead of handleReset -->
-          <v-btn @click="handleClose"> Cancel </v-btn>
+          <div class="flex justify-end">
+            <v-btn class="me-4 bg-black" type="submit" :disabled="loading"
+              >Submit</v-btn
+            >
+            <v-btn @click="handleClear">Clear</v-btn>
+            <v-btn @click="handleClose" class="ml-auto bg-red-700 text-white"
+              >Cancel</v-btn
+            >
+          </div>
         </form>
       </v-card>
     </v-dialog>

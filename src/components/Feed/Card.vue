@@ -1,11 +1,11 @@
 <script setup>
 import { defineComponent, onMounted, watch, ref, computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
-import { useUserStore } from '../stores/users';
+import { useUserStore } from '../../stores/users';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { storeToRefs } from 'pinia';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
 const imagePath = import.meta.env.VITE_IMAGE_PATH;
 
 const router = useRouter();
@@ -32,6 +32,12 @@ const Card = defineComponent({
     selection: 1,
   }),
 });
+
+const showFullContent = ref(false);
+
+const toggleContent = () => {
+  showFullContent.value = !showFullContent.value;
+};
 
 const props = defineProps([
   'post',
@@ -110,7 +116,7 @@ const countLikes = async () => {
 
 const formattedLikesCount = computed(() => {
   if (likesCount.value === 0) {
-    return 'Be the first to like this';
+    return 'Be the first to like this post';
   } else if (likesCount.value === 1) {
     return '1 like';
   } else {
@@ -123,12 +129,19 @@ const formatPostContent = (content) => {
     return '';
   }
 
+  if (showFullContent.value) {
+    return content.replace(/\n/g, '<br>');
+  }
+
+  const truncatedContent =
+    content.length > 600 ? content.substring(0, 600) + '...' : content;
   const hashtagRegex = /#(\w+)/g;
   const mentionRegex = /@(\w+)/g;
 
-  const replacedContent = content
+  const replacedContent = truncatedContent
     .replace(hashtagRegex, '<a href="/tags/$1">#$1</a>')
-    .replace(mentionRegex, '<a href="/profile/$1">@$1</a>');
+    .replace(mentionRegex, '<a href="/profile/$1">@$1</a>')
+    .replace(/\n/g, '<br>');
 
   return replacedContent;
 };
@@ -146,7 +159,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-card :loading="loading" class="mx-auto my-9" max-width="470">
+  <v-card :loading="loading" class="mx-auto my-9 max-w-[470px]">
     <template v-slot:loader="{ isActive }">
       <v-progress-linear
         :active="isActive"
@@ -158,6 +171,7 @@ onMounted(() => {
 
     <v-card-item>
       <v-img
+        v-if="profileAvatar !== undefined"
         :src="`${imagePath}${profileAvatar}`"
         width="40"
         height="40"
@@ -182,7 +196,23 @@ onMounted(() => {
       height="auto"
       :src="`${imagePath}${post.image_urls[0]}`"
     ></v-img>
+    <v-card-item class="text-sm font-semibold">{{
+      formattedLikesCount
+    }}</v-card-item>
 
+    <v-card-text>
+      <div>
+        <span class="post-username">{{ post.profile_username }}</span>
+        <span v-html="formatPostContent(post.post_content)" class="ml-1"></span>
+        <button
+          v-if="post.post_content.length > 600 && !showFullContent"
+          @click="toggleContent"
+          class="text-grey"
+        >
+          more
+        </button>
+      </div>
+    </v-card-text>
     <v-card-item class="card-icons">
       <button @click="likePost" v-if="!likedPost">
         <v-icon icon="fa-regular fa-heart"></v-icon>
@@ -203,14 +233,6 @@ onMounted(() => {
         <v-icon icon="fa-solid fa-floppy-disk" color="green-darken-2"></v-icon>
       </button>
     </v-card-item>
-    <v-card-item>{{ formattedLikesCount }}</v-card-item>
-
-    <v-card-text>
-      <div>
-        <span class="post-username">{{ post.profile_username }}</span>
-        <div v-html="formatPostContent(post.post_content)"></div>
-      </div>
-    </v-card-text>
   </v-card>
 </template>
 

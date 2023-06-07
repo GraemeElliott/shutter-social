@@ -97,7 +97,7 @@ const saveUser = async () => {
           <span class="text-h5"> Edit User Profile</span>
         </v-card-title>
         <v-card-text>
-          <v-container>
+          <div>
             <v-row>
               <v-col cols="12">
                 <v-img
@@ -152,7 +152,7 @@ const saveUser = async () => {
                 ></v-textarea>
               </v-col>
             </v-row>
-          </v-container>
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
