@@ -139,8 +139,8 @@ const formatPostContent = (content) => {
   const mentionRegex = /@(\w+)/g;
 
   const replacedContent = truncatedContent
-    .replace(hashtagRegex, '<a href="/tags/$1">#$1</a>')
-    .replace(mentionRegex, '<a href="/profile/$1">@$1</a>')
+    .replace(hashtagRegex, '<a href="/tags/$1" class="text-sky-800">#$1</a>')
+    .replace(mentionRegex, '<a href="/profile/$1" class="text-sky-800">@$1</a>')
     .replace(/\n/g, '<br>');
 
   return replacedContent;
@@ -160,49 +160,60 @@ onMounted(() => {
 
 <template>
   <v-card :loading="loading" class="mx-auto my-9 max-w-[470px]">
-    <template v-slot:loader="{ isActive }">
-      <v-progress-linear
-        :active="isActive"
-        color="deep-purple"
-        height="4"
-        indeterminate
-      ></v-progress-linear>
-    </template>
+    <v-list-item class="pl-1.5 mt-2 mb-2">
+      <template v-slot:prepend>
+        <v-avatar :image="`${imagePath}${profileAvatar}`"></v-avatar>
 
-    <v-card-item>
-      <v-img
-        v-if="profileAvatar !== undefined"
-        :src="`${imagePath}${profileAvatar}`"
-        width="40"
-        height="40"
-        aspect-ratio="1/1"
-        cover
-        class="profile-avatar"
-      >
-      </v-img>
-      <RouterLink :to="`/profile/${profileUsername}`">
-        <v-card-title>{{ profileUsername }}</v-card-title>
-      </RouterLink>
+        <RouterLink :to="`/profile/${profileUsername}`">
+          <v-list-item-title class="font-semibold">{{
+            profileUsername
+          }}</v-list-item-title>
+        </RouterLink>
 
-      <v-card-subtitle>
-        <span class="me-1">{{ dayjs(post.created_at).fromNow() }}</span>
-
-        <v-icon color="error" icon="mdi-fire-circle" size="small"></v-icon>
-      </v-card-subtitle>
-    </v-card-item>
+        <v-card-subtitle>
+          <span>{{ dayjs(post.created_at).fromNow() }}</span>
+        </v-card-subtitle>
+      </template>
+    </v-list-item>
 
     <v-img
       cover
       height="auto"
       :src="`${imagePath}${post.image_urls[0]}`"
     ></v-img>
-    <v-card-item class="text-sm font-semibold">{{
+
+    <v-card-item class="flex pl-2">
+      <button @click="likePost" v-if="!likedPost">
+        <v-icon icon="fa-regular fa-heart"></v-icon>
+      </button>
+
+      <button @click="unlikePost" v-else>
+        <v-icon
+          icon="fa-solid fa-heart fa-heart-liked"
+          class="text-red-700"
+        ></v-icon>
+      </button>
+
+      <button @click="savePost" v-if="!savedPost">
+        <v-icon icon="fa-regular fa-floppy-disk"></v-icon>
+      </button>
+
+      <button @click="unsavePost" v-else>
+        <v-icon
+          icon="fa-solid fa-floppy-disk"
+          class="text-emerald-800"
+        ></v-icon>
+      </button>
+    </v-card-item>
+    <v-card-item class="text-sm font-semibold pl-2">{{
       formattedLikesCount
     }}</v-card-item>
 
-    <v-card-text>
+    <v-card-text class="pl-2">
       <div>
-        <span class="post-username">{{ post.profile_username }}</span>
+        <RouterLink :to="`/profile/${profileUsername}`">
+          <span class="post-username">{{ post.profile_username }}</span>
+        </RouterLink>
         <span v-html="formatPostContent(post.post_content)" class="ml-1"></span>
         <button
           v-if="post.post_content.length > 600 && !showFullContent"
@@ -213,46 +224,15 @@ onMounted(() => {
         </button>
       </div>
     </v-card-text>
-    <v-card-item class="card-icons">
-      <button @click="likePost" v-if="!likedPost">
-        <v-icon icon="fa-regular fa-heart"></v-icon>
-      </button>
-
-      <button @click="unlikePost" v-else>
-        <v-icon
-          icon="fa-solid fa-heart fa-heart-liked"
-          color="red-darken-2"
-        ></v-icon>
-      </button>
-
-      <button @click="savePost" v-if="!savedPost">
-        <v-icon icon="fa-regular fa-floppy-disk"></v-icon>
-      </button>
-
-      <button @click="unsavePost" v-else>
-        <v-icon icon="fa-solid fa-floppy-disk" color="green-darken-2"></v-icon>
-      </button>
-    </v-card-item>
   </v-card>
 </template>
 
 <style scoped>
-.profile-avatar {
-  border-radius: 50%;
-}
-.card-icons {
-  display: flex;
-}
-
 .fa-heart {
   margin-right: 0.5rem;
 }
 
 .post-username {
   font-weight: 500;
-}
-
-.fa-heart-liked {
-  fill: red;
 }
 </style>

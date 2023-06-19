@@ -36,47 +36,61 @@ const submit = async () => {
             <v-btn variant="text" @click="submit">Save</v-btn>
           </v-toolbar-items>
         </v-toolbar>
-        <div v-if="!postStore.loading">
-          <div class="custom-upload">
-            <label for="file-input" class="custom-button">Add Images</label>
-            <input
-              type="file"
-              accept=".jpg, .png"
-              multiple
-              @change="postStore.handleUploadChange"
-              id="file-input"
-              class="file-input"
-            />
-          </div>
-          <div>
-            <div v-for="(image, index) in postStore.previewImages" :key="index">
-              <img :src="image" />
-              <button @click="postStore.removeImage(index)">Remove</button>
+
+        <div class="d-flex align-center justify-center h-full">
+          <v-card-text class="text-center">
+            <div
+              v-if="!postStore.loading"
+              class="flex flex-col items-center justify-center"
+            >
+              <div class="flex mb-20">
+                <div
+                  v-for="(image, index) in postStore.previewImages"
+                  :key="index"
+                >
+                  <img :src="image" class="h-100 w-96 object-cover mr-2" />
+                  <v-btn @click="postStore.removeImage(index)" class="bg-red">
+                    <v-icon icon="fa:fas fa-xmark"></v-icon>
+                  </v-btn>
+                </div>
+              </div>
+              <p v-if="postStore.exceedsLimit">
+                You have exceeded the maximum number of files allowed (10).
+              </p>
+              <div>
+                <label for="file-input" class="custom-button mb-6"
+                  >Add Images</label
+                >
+                <input
+                  type="file"
+                  accept=".jpg, .png"
+                  multiple
+                  @change="postStore.handleUploadChange"
+                  id="file-input"
+                  class="file-input"
+                />
+              </div>
+              <v-textarea
+                counter
+                label="Post"
+                v-model="postStore.postContent"
+                :maxlength="maxCharacters"
+                class="w-96"
+              ></v-textarea>
             </div>
-          </div>
-          <p v-if="postStore.exceedsLimit">
-            You have exceeded the maximum number of files allowed (10).
-          </p>
-          <v-textarea
-            counter
-            label="Text"
-            v-model="postStore.postContent"
-            :maxlength="maxCharacters"
-          ></v-textarea>
+            <div v-else class="spinner">
+              <v-progress-circular
+                indeterminate
+                color="primary"
+              ></v-progress-circular>
+            </div>
+          </v-card-text>
         </div>
-        <div v-else class="spinner">
-          <v-progress-circular
-            indeterminate
-            color="primary"
-          ></v-progress-circular>
-        </div>
-        <v-alert v-if="postStore.errorMessage" type="error">{{
-          postStore.errorMessage
-        }}</v-alert>
       </v-card>
     </v-dialog>
   </v-row>
 </template>
+
 <style scoped>
 .dialog-bottom-transition-enter-active,
 .dialog-bottom-transition-leave-active {
@@ -86,16 +100,11 @@ input {
   margin-top: 10px;
 }
 
-.custom-upload {
-  position: relative;
-  display: inline-block;
-}
-
 .custom-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #e0e0e0;
-  color: #333;
+  background-color: #3f51b5;
+  color: #fff;
   border-radius: 4px;
   cursor: pointer;
 }

@@ -84,7 +84,9 @@ const props = defineProps({
               color="primary"
             ></v-progress-circular>
           </div>
-          <v-alert v-if="errorMessage" type="error">{{ errorMessage }}</v-alert>
+          <v-alert v-if="errorMessage" type="error" class="mb-4">{{
+            errorMessage
+          }}</v-alert>
           <div class="flex justify-end">
             <v-btn class="me-4 bg-black" type="submit" :disabled="loading"
               >Submit</v-btn

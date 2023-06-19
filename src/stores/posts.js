@@ -1,6 +1,10 @@
 import { defineStore } from 'pinia';
 import { supabase } from '../supabase';
 import { v4 as uuidv4 } from 'uuid';
+import { useUserStore } from './users';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 export const usePostStore = defineStore('post', {
   state: () => ({
@@ -67,6 +71,7 @@ export const usePostStore = defineStore('post', {
     },
 
     async submit() {
+      const userStore = useUserStore();
       this.loading = true;
 
       const imageUrls = []; // Array to store image URLs
@@ -107,7 +112,7 @@ export const usePostStore = defineStore('post', {
       const newPost = await supabase.from('posts').insert({
         image_urls: imageUrls,
         post_content: this.postContent,
-        profile_id: user.value.id,
+        profile_id: userStore.user.id,
       });
 
       if (newPost.error) {
@@ -121,7 +126,7 @@ export const usePostStore = defineStore('post', {
       this.loading = false;
       this.handleCancel();
       await this.fetchPosts();
-      const username = user.value.username;
+      const username = userStore.user.username;
       router.push(`/profile/${username}`);
     },
   },

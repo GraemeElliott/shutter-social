@@ -114,24 +114,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="!loadingUser" class="flex justify-center">
-    <div class="mx-5 max-w-10xl">
-      <div v-if="user">
-        <div v-for="post in posts" :key="post.id">
-          <div class="h-full">
-            <Card
-              :post="post"
-              :user="user"
-              :loadingUser="loadingUser"
-              :profileUsername="post.profile_username"
-              :profileAvatar="post.profile_avatar"
-            />
-          </div>
-        </div>
+  <div v-if="!loadingUser">
+    <div v-if="!user">
+      <Home />
+    </div>
+    <div v-else>
+      <div v-for="post in posts" :key="post.id">
+        <Card
+          :post="post"
+          :user="user"
+          :loadingUser="loadingUser"
+          :profileUsername="post.profile_username"
+          :profileAvatar="post.profile_avatar"
+        />
       </div>
-      <VContainer v-else>
-        <Home />
-      </VContainer>
     </div>
   </div>
   <div v-else class="spinner">
