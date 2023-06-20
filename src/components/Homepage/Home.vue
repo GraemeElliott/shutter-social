@@ -6,7 +6,9 @@ import AuthModal from './AuthModal.vue';
   <div class="h-screen flex">
     <div class="w-full sm:w-1/2 flex items-center justify-center">
       <div class="home-buttons flex flex-col w-1/2 items-center">
-        <h1 class="ss-logo mb-8 mr-3 text-center">Shutter Social</h1>
+        <h1 class="ss-logo mb-8 mr-3 text-center text-5xl sm:text-7xl">
+          Shutter Social
+        </h1>
         <AuthModal :isLogin="false" class="mb-3 bg-indigo" />
         <AuthModal :isLogin="true" class="bg-black" />
       </div>
@@ -26,7 +28,6 @@ import AuthModal from './AuthModal.vue';
 @import url('https://fonts.googleapis.com/css2?family=Bungee&family=PT+Sans&display=swap');
 
 .ss-logo {
-  font-size: 5rem;
   font-family: 'Bungee', cursive;
 }
 </style>

@@ -90,7 +90,9 @@ const saveUser = async () => {
   <v-row justify="center">
     <v-dialog v-model="dialog" persistent width="1024">
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props"> <v-icon icon="fa-solid fa-pen"></v-icon> </v-btn>
+        <v-btn v-bind="props" class="rounded-full bg-black">
+          EDIT PROFILE
+        </v-btn>
       </template>
       <v-card>
         <v-card-title>

@@ -47,24 +47,26 @@ const fetchPostsByTag = async (tagname) => {
   await fetchPostUsernames();
 };
 
-const fetchPostsFromFollowedUsers = async (ownerProfileIds) => {
+const fetchPostsFromFollowedUsers = async (ownerProfileIds, startDate) => {
   // Fetch posts from followed users
   const { data: followedUsersPosts } = await supabase
     .from('posts')
     .select()
     .in('profile_id', ownerProfileIds)
+    .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(50);
 
   return followedUsersPosts;
 };
 
-const fetchUserPosts = async (userId) => {
+const fetchUserPosts = async (userId, startDate) => {
   // Fetch user's own posts
   const { data: userPosts } = await supabase
     .from('posts')
     .select()
     .eq('profile_id', userId)
+    .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -86,9 +88,14 @@ const fetchData = async () => {
         (followingUser) => followingUser.following_id
       );
 
-      const followedUsersPostsPromise =
-        fetchPostsFromFollowedUsers(ownerProfileIds);
-      const userPostsPromise = fetchUserPosts(user.value.id);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 14);
+
+      const followedUsersPostsPromise = fetchPostsFromFollowedUsers(
+        ownerProfileIds,
+        startDate
+      );
+      const userPostsPromise = fetchUserPosts(user.value.id, startDate);
 
       const [followedUsersPosts, userPosts] = await Promise.all([
         followedUsersPostsPromise,
@@ -119,14 +126,18 @@ onMounted(() => {
       <Home />
     </div>
     <div v-else>
-      <div v-for="post in posts" :key="post.id">
-        <Card
-          :post="post"
-          :user="user"
-          :loadingUser="loadingUser"
-          :profileUsername="post.profile_username"
-          :profileAvatar="post.profile_avatar"
-        />
+      <div class="flex justify-center">
+        <div class="max-w-screen-sm mx-auto">
+          <div v-for="post in posts" :key="post.id" class="mb-4">
+            <Card
+              :post="post"
+              :user="user"
+              :loadingUser="loadingUser"
+              :profileUsername="post.profile_username"
+              :profileAvatar="post.profile_avatar"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>

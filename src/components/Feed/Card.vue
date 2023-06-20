@@ -1,14 +1,12 @@
 <script setup>
 import { defineComponent, onMounted, watch, ref, computed } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink } from 'vue-router';
 import { useUserStore } from '../../stores/users';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { storeToRefs } from 'pinia';
 import { supabase } from '../../supabase';
 const imagePath = import.meta.env.VITE_IMAGE_PATH;
-
-const router = useRouter();
 
 const likedPost = ref(false);
 const updateLikeButton = (like) => {
@@ -159,7 +157,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-card :loading="loading" class="mx-auto my-9 max-w-[470px]">
+  <v-card :loading="loading" class="mx-auto my-9 sm:w-[470px]">
     <v-list-item class="pl-1.5 mt-2 mb-2">
       <template v-slot:prepend>
         <v-avatar :image="`${imagePath}${profileAvatar}`"></v-avatar>

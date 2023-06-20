@@ -1,11 +1,13 @@
 <script setup>
 import { usePostStore } from '../stores/posts';
+import { useRouter } from 'vue-router';
 
 const postStore = usePostStore();
+const router = useRouter();
 const maxCharacters = 2200;
 
 const submit = async () => {
-  await postStore.submit();
+  await postStore.submit(router);
 };
 </script>
 <template>
@@ -37,7 +39,7 @@ const submit = async () => {
           </v-toolbar-items>
         </v-toolbar>
 
-        <div class="d-flex align-center justify-center h-full">
+        <div class="d-flex align-center justify-center">
           <v-card-text class="text-center">
             <div v-if="!postStore.loading" class="flex flex-col justify-center">
               <div class="flex flex-wrap items-center justify-center">

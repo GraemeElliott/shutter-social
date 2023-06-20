@@ -2,9 +2,6 @@ import { defineStore } from 'pinia';
 import { supabase } from '../supabase';
 import { v4 as uuidv4 } from 'uuid';
 import { useUserStore } from './users';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
 
 export const usePostStore = defineStore('post', {
   state: () => ({
@@ -74,7 +71,7 @@ export const usePostStore = defineStore('post', {
       this.previewImages.splice(index, 1);
     },
 
-    async submit() {
+    async submit(router) {
       const userStore = useUserStore();
       this.loading = true;
 

@@ -71,6 +71,7 @@ const props = defineProps({
             <v-text-field
               v-model="userCredentials.email"
               label="E-mail"
+              type="email"
             ></v-text-field>
             <v-text-field
               type="password"

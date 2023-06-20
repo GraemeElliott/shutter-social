@@ -120,20 +120,23 @@ const filteredPosts = computed(() => {
 </script>
 
 <template>
-  <div class="" v-if="!loading">
-    <UserBar
-      :key="$route.params.username"
-      :user="user"
-      :userInfo="userInfo"
-      :isFollowing="isFollowing"
-      :updateIsFollowing="updateIsFollowing"
-    />
+  <div class="flex justify-center items-center" v-if="!loading">
+    <div class="max-w-screen-lg w-full mx-4 sm:mx-8 md:mx-16">
+      <!-- Content goes here -->
+      <UserBar
+        :key="$route.params.username"
+        :user="user"
+        :userInfo="userInfo"
+        :isFollowing="isFollowing"
+        :updateIsFollowing="updateIsFollowing"
+      />
 
-    <ProfileGallery
-      :posts="filteredPosts"
-      :imagePath="imagePath"
-      :key="route.params.username"
-    />
+      <ProfileGallery
+        :posts="filteredPosts"
+        :imagePath="imagePath"
+        :key="route.params.username"
+      />
+    </div>
   </div>
   <div v-else class="spinner">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>

@@ -44,38 +44,77 @@ const unFollowUser = async () => {
 </script>
 
 <template>
-  <div class="userbar-container" v-if="props.user">
-    <v-img
-      :key="props.user.id"
-      :src="`${imagePath}${props.user.avatar}`"
-      width="150"
-      height="150"
-      aspect-ratio="1/1"
-      cover
-      class="profile-avatar"
-    >
-    </v-img>
-    <div>{{ props.user.username }}</div>
-    <div v-if="props.userInfo">
-      <h2>{{ props.userInfo.posts }} Posts</h2>
-      <h2>{{ props.userInfo.followers }} Followers</h2>
-      <h2>{{ props.userInfo.following }} Following</h2>
+  <div
+    class="flex flex-col items-center justify-center mb-15 sm:flex-row"
+    v-if="props.user"
+  >
+    <div>
+      <v-img
+        :key="props.user.id"
+        :src="`${imagePath}${props.user.avatar}`"
+        width="150"
+        height="150"
+        aspect-ratio="1/1"
+        cover
+        class="profile-avatar max-w-full h-auto sm:mr-5"
+      >
+      </v-img>
     </div>
-    <div v-if="user.username === props.user.username">
-      <EditProfile :user="user" />
-    </div>
-  </div>
-
-  <div class="userbar-container" v-else>
-    <div>User not found.</div>
-  </div>
-
-  <div v-if="user">
-    <div v-if="user.username !== profileUsername">
-      <div>
-        <v-btn v-if="!props.isFollowing" @click="followUser">Follow</v-btn>
-        <v-btn v-else @click="unFollowUser">Unfollow</v-btn>
+    <div class="user-info">
+      <div
+        class="mb-5 mt-3 text-center sm:text-left sm:mx-auto sm:max-w-screen-sm"
+      >
+        <h1 class="font-bold">{{ props.user.username }}</h1>
+        <h2>{{ props.user.bio }}</h2>
       </div>
+      <div
+        v-if="props.userInfo"
+        class="mb-10 mt-3 text-center sm:text-left sm:mx-auto sm:max-w-screen-sm"
+      >
+        <div class="flex flex-row justify-center">
+          <div class="flex items-center mr-6">
+            <span class="font-bold mr-1">{{ props.userInfo.posts }}</span>
+            <span>Posts</span>
+          </div>
+          <div class="flex items-center mr-6">
+            <span class="font-bold mr-1">{{ props.userInfo.followers }}</span>
+            <span>Followers</span>
+          </div>
+          <div class="flex items-center">
+            <span class="font-bold mr-1">{{ props.userInfo.following }}</span>
+            <span>Following</span>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="user.username === props.user.username">
+        <EditProfile :user="user" />
+      </div>
+      <div v-if="user">
+        <div v-if="user.username !== profileUsername">
+          <div>
+            <v-btn
+              v-if="!props.isFollowing"
+              @click="followUser"
+              class="rounded-full bg-black"
+              >Follow</v-btn
+            >
+            <v-btn v-else @click="unFollowUser" class="rounded-full bg-zinc-300"
+              >Unfollow</v-btn
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div v-else class="flex justify-center text-center">
+    <div>
+      <h1 class="font-bold text-2xl mb-4">User not found</h1>
+      <h2>
+        The profile you tried to search for does not exist. Go back to the
+        homepage.
+      </h2>
     </div>
   </div>
 </template>
