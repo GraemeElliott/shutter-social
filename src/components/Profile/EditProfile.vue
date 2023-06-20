@@ -1,7 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { useField } from 'vee-validate';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
 import { v4 as uuidv4 } from 'uuid';
 const imagePath = import.meta.env.VITE_IMAGE_PATH;
 

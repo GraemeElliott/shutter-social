@@ -17,7 +17,7 @@ const submit = async () => {
       transition="dialog-bottom-transition"
     >
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" prepend-icon="fa-plus"> Create Post </v-btn>
+        <v-btn v-bind="props"> Create Post </v-btn>
       </template>
       <v-card>
         <v-toolbar>
@@ -39,27 +39,31 @@ const submit = async () => {
 
         <div class="d-flex align-center justify-center h-full">
           <v-card-text class="text-center">
-            <div
-              v-if="!postStore.loading"
-              class="flex flex-col items-center justify-center"
-            >
-              <div class="flex mb-20">
+            <div v-if="!postStore.loading" class="flex flex-col justify-center">
+              <div class="flex flex-wrap items-center justify-center">
                 <div
                   v-for="(image, index) in postStore.previewImages"
                   :key="index"
+                  class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-6"
                 >
-                  <img :src="image" class="h-100 w-96 object-cover mr-2" />
-                  <v-btn @click="postStore.removeImage(index)" class="bg-red">
-                    <v-icon icon="fa:fas fa-xmark"></v-icon>
-                  </v-btn>
+                  <div class="flex flex-col mr-4">
+                    <img :src="image" class="h-96 w-100 object-cover mb-2" />
+                    <v-btn @click="postStore.removeImage(index)" class="bg-red">
+                      <v-icon icon="fa:fas fa-xmark"></v-icon>
+                    </v-btn>
+                  </div>
                 </div>
               </div>
-              <p v-if="postStore.exceedsLimit">
-                You have exceeded the maximum number of files allowed (10).
-              </p>
+              <div class="flex justify-center mb-10">
+                <div>
+                  <v-alert v-if="postStore.exceedsLimit" type="error">
+                    You have exceeded the maximum number of files allowed (10)
+                  </v-alert>
+                </div>
+              </div>
               <div>
                 <label for="file-input" class="custom-button mb-6"
-                  >Add Images</label
+                  >ADD IMAGES</label
                 >
                 <input
                   type="file"
@@ -70,13 +74,18 @@ const submit = async () => {
                   class="file-input"
                 />
               </div>
-              <v-textarea
-                counter
-                label="Post"
-                v-model="postStore.postContent"
-                :maxlength="maxCharacters"
-                class="w-96"
-              ></v-textarea>
+              <div class="flex justify-center">
+                <div class="w-50">
+                  <v-textarea
+                    counter
+                    auto-grow
+                    label="Post"
+                    v-model="postStore.postContent"
+                    :maxlength="maxCharacters"
+                    class="mx-auto"
+                  ></v-textarea>
+                </div>
+              </div>
             </div>
             <div v-else class="spinner">
               <v-progress-circular
@@ -103,7 +112,7 @@ input {
 .custom-button {
   display: inline-block;
   padding: 10px 20px;
-  background-color: #3f51b5;
+  background-color: #000;
   color: #fff;
   border-radius: 4px;
   cursor: pointer;

@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive } from 'vue';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
 const props = defineProps({
   posts: Array,
   imagePath: String,

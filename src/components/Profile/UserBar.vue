@@ -1,9 +1,9 @@
 <script setup>
 import { toRef, reactive } from 'vue';
-import { useUserStore } from '../stores/users';
+import { useUserStore } from '../../stores/users';
 import { useRoute } from 'vue-router';
-import { supabase } from '../supabase';
-import EditProfile from '../components/EditProfile.vue';
+import { supabase } from '../../supabase';
+import EditProfile from './EditProfile.vue';
 const imagePath = import.meta.env.VITE_IMAGE_PATH;
 
 const route = useRoute();

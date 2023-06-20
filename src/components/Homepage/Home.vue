@@ -4,16 +4,14 @@ import AuthModal from './AuthModal.vue';
 
 <template>
   <div class="h-screen flex">
-    <div class="w-1/2">
-      <div class="h-full flex justify-center items-center">
-        <div class="home-buttons flex flex-col w-1/2 items-center">
-          <h1 class="ss-logo mb-8 mr-3 text-center">Shutter Social</h1>
-          <AuthModal :isLogin="false" class="mb-3 bg-indigo" />
-          <AuthModal :isLogin="true" class="bg-black" />
-        </div>
+    <div class="w-full sm:w-1/2 flex items-center justify-center">
+      <div class="home-buttons flex flex-col w-1/2 items-center">
+        <h1 class="ss-logo mb-8 mr-3 text-center">Shutter Social</h1>
+        <AuthModal :isLogin="false" class="mb-3 bg-indigo" />
+        <AuthModal :isLogin="true" class="bg-black" />
       </div>
     </div>
-    <div class="w-1/2">
+    <div class="w-1/2 hidden sm:block">
       <div class="h-full">
         <img
           src="../../assets/home-image.jpg"

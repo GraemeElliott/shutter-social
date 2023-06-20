@@ -1,6 +1,6 @@
 <script setup>
 import { defineComponent } from 'vue';
-import Profile from '../components/Profile.vue';
+import Profile from '../components/Profile/Profile.vue';
 
 const ProfileView = defineComponent({
   name: 'ProfileView',

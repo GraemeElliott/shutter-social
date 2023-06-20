@@ -2,10 +2,10 @@
 import UserBar from './UserBar.vue';
 import ProfileGallery from './ProfileGallery.vue';
 import { ref, onMounted, computed, watch, reactive } from 'vue';
-import { supabase } from '../supabase';
+import { supabase } from '../../supabase';
 import { useRoute } from 'vue-router';
-import { usePostStore } from '../stores/posts';
-import { useUserStore } from '../stores/users';
+import { usePostStore } from '../../stores/posts';
+import { useUserStore } from '../../stores/users';
 import { storeToRefs } from 'pinia';
 
 const route = useRoute();
@@ -120,7 +120,7 @@ const filteredPosts = computed(() => {
 </script>
 
 <template>
-  <div class="profile-container" v-if="!loading">
+  <div class="" v-if="!loading">
     <UserBar
       :key="$route.params.username"
       :user="user"

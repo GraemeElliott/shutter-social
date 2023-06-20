@@ -15,6 +15,7 @@ export const usePostStore = defineStore('post', {
     file: null,
     loading: false,
     errorMessage: '',
+    alertTimeout: null,
     dialog: false,
     maxFiles: 10,
   }),
@@ -44,12 +45,15 @@ export const usePostStore = defineStore('post', {
     async handleUploadChange(event) {
       const files = event.target.files;
       const fileCount = files.length;
-      // Clear existing preview images and reset exceedsLimit flag
-      this.previewImages = [];
-      this.exceedsLimit = false;
       // Check if the number of selected files exceeds the limit
-      if (fileCount > this.maxFiles) {
+      if (this.previewImages.length + fileCount > this.maxFiles) {
         this.exceedsLimit = true;
+        // Clear the previous timeout (if any)
+        clearTimeout(this.alertTimeout);
+        // Set a new timeout to hide the alert after 5 seconds
+        this.alertTimeout = setTimeout(() => {
+          this.exceedsLimit = false;
+        }, 3000);
         return;
       }
       // Perform operations for each file
