@@ -110,7 +110,7 @@ const saveUser = async () => {
                   height="150"
                   aspect-ratio="1/1"
                   cover
-                  class="profile-avatar"
+                  class="profile-avatar mb-4"
                 >
                 </v-img>
                 <div class="custom-upload">
@@ -158,10 +158,16 @@ const saveUser = async () => {
         </v-card-text>
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="dialog = false"
-            >Close</v-btn
+          <v-btn
+            class="bg-red-700 text-white"
+            variant="text"
+            @click="dialog = false"
+            >Cancel</v-btn
           >
-          <v-btn color="blue-darken-1" variant="text" @click="saveUser"
+          <v-btn
+            class="bg-green-700 text-white"
+            variant="text"
+            @click="saveUser"
             >Save</v-btn
           >
         </v-card-actions>

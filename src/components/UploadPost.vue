@@ -35,15 +35,18 @@ const submit = async () => {
         <div class="d-flex align-center justify-center">
           <v-card-text class="text-center">
             <div v-if="!postStore.loading" class="flex flex-col justify-center">
-              <div class="flex flex-wrap items-center justify-center">
+              <div class="flex flex-wrap items-center">
                 <div
                   v-for="(image, index) in postStore.previewImages"
                   :key="index"
-                  class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-6"
+                  class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-6"
                 >
                   <div class="flex flex-col mr-4">
-                    <img :src="image" class="h-96 w-100 object-cover mb-2" />
-                    <v-btn @click="postStore.removeImage(index)" class="bg-red">
+                    <img :src="image" class="h-60 w-100 object-cover mb-2" />
+                    <v-btn
+                      @click="postStore.removeImage(index)"
+                      class="bg-red-700 text-white"
+                    >
                       <v-icon icon="fa:fas fa-xmark"></v-icon>
                     </v-btn>
                   </div>
@@ -82,10 +85,15 @@ const submit = async () => {
                 </div>
               </div>
               <div>
-                <v-btn @click="postStore.handleCancel" class="mr-4 bg-red">
+                <v-btn
+                  @click="postStore.handleCancel"
+                  class="mr-4 bg-red-700 text-white"
+                >
                   Cancel
                 </v-btn>
-                <v-btn @click="submit" class="bg-green">Save</v-btn>
+                <v-btn @click="submit" class="bg-green-700 text-white"
+                  >Save</v-btn
+                >
               </div>
             </div>
             <div v-else class="spinner">

@@ -9,8 +9,9 @@ import AuthModal from './AuthModal.vue';
         <h1 class="ss-logo mb-8 mr-3 text-center text-5xl sm:text-7xl">
           Shutter Social
         </h1>
+        <div>A social media platform for photographers</div>
         <AuthModal :isLogin="false" class="mb-3 bg-indigo" />
-        <AuthModal :isLogin="true" class="bg-black" />
+        <AuthModal :isLogin="true" class="bg-green-700 text-white" />
       </div>
     </div>
     <div class="w-1/2 hidden sm:block">

@@ -10,7 +10,6 @@ import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const { username } = route.params;
-
 const user = ref(null);
 const postStore = usePostStore();
 const userStore = useUserStore();
@@ -26,7 +25,6 @@ const userInfo = reactive({
   followers: null,
   following: null,
 });
-
 const fetchData = async (username) => {
   loading.value = true;
   const { data: userData } = await supabase
@@ -34,32 +32,24 @@ const fetchData = async (username) => {
     .select()
     .eq('username', username)
     .single();
-
   if (!userData) {
     loading.value = false;
     return (user.value = null);
   }
-
   user.value = userData;
-
   await postStore.fetchPosts();
-
   loading.value = false;
-
   await fetchIsFollowing();
   const followerCount = await fetchFollowersCount();
   const followingCount = await fetchFollowingCount();
   const postsCount = await fetchPostsCount();
-
   userInfo.followers = followerCount;
   userInfo.following = followingCount;
   userInfo.posts = postsCount;
-
   return {
     posts: postStore.posts,
   };
 };
-
 const fetchIsFollowing = async () => {
   if (loggedInUser.value && loggedInUser.value.id !== user.value.id) {
     const { data } = await supabase
@@ -68,57 +58,45 @@ const fetchIsFollowing = async () => {
       .eq('follower_id', loggedInUser.value.id)
       .eq('following_id', user.value.id)
       .single();
-
     if (data) return (isFollowing.value = true);
   }
 };
-
 const fetchFollowersCount = async () => {
   const { count } = await supabase
     .from('followers_following')
     .select('*', { count: 'exact' })
     .eq('following_id', user.value.id);
-
   return count;
 };
-
 const fetchFollowingCount = async () => {
   const { count } = await supabase
     .from('followers_following')
     .select('*', { count: 'exact' })
     .eq('follower_id', user.value.id);
-
   return count;
 };
-
 const fetchPostsCount = async () => {
   const { count } = await supabase
     .from('posts')
     .select('*', { count: 'exact' })
     .eq('profile_id', user.value.id);
-
   return count;
 };
-
 watch(loggedInUser, () => {
   fetchIsFollowing();
 });
-
 onMounted(() => {
   fetchData(username);
 });
-
 const currentUserID = computed(() => {
   return user.value?.id;
 });
-
 const filteredPosts = computed(() => {
   return postStore.posts.filter(
     (post) => post.profile_id === currentUserID.value
   );
 });
 </script>
-
 <template>
   <div class="flex justify-center items-center" v-if="!loading">
     <div class="max-w-screen-lg w-full mx-4 sm:mx-8 md:mx-16">
@@ -130,7 +108,6 @@ const filteredPosts = computed(() => {
         :isFollowing="isFollowing"
         :updateIsFollowing="updateIsFollowing"
       />
-
       <ProfileGallery
         :posts="filteredPosts"
         :imagePath="imagePath"
@@ -142,7 +119,6 @@ const filteredPosts = computed(() => {
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
   </div>
 </template>
-
 <style scoped>
 .spinner {
   display: flex;

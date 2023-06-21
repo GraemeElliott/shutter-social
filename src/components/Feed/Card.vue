@@ -183,7 +183,6 @@ onMounted(() => {
       cover
       height="auto"
       :src="`${imagePath}${post.image_urls[0]}`"
-      class="cursor-pointer"
     ></v-img>
 
     <v-card-item class="flex pl-2">

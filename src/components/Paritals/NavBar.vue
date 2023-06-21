@@ -53,20 +53,14 @@ const navigateToRoot = () => {
       </VCard>
     </VContainer> -->
 
-    <div v-if="!loadingUser" class="flex items-center">
-      <div v-if="user" class="flex items-center flex-wrap">
+    <div v-if="!loadingUser" class="flex items-center justify-center">
+      <div v-if="user" class="flex items-center flex-wrap justify-center">
         <UploadPost class="mr-2" />
-        <v-btn
-          :to="`/profile/${user.username}`"
-          class="mr-2 w-1/4 sm:w-1/2 md:w-1/4 lg:w-1/4 xl:w-1/4"
-          >Profile</v-btn
-        >
+        <v-btn :to="`/profile/${user.username}`" class="mr-2">Profile</v-btn>
         <div v-if="user.isAdmin" class="mr-2">
-          <v-btn class="w-1/4 sm:w-1/2 md:w-1/4 lg:w-1/4 xl:w-1/4">Admin</v-btn>
+          <v-btn class="w-full">Admin</v-btn>
         </div>
-        <v-btn
-          @click="handleLogOut"
-          class="mr-2 bg-black w-1/4 sm:w-1/2 md:w-1/4 lg:w-1/4 xl:w-1/4"
+        <v-btn @click="handleLogOut" class="bg-red-700 text-white mt-4 sm:mt-0"
           >Logout</v-btn
         >
       </div>
