@@ -53,7 +53,7 @@ const fetchPostsFromFollowedUsers = async (ownerProfileIds, startDate) => {
     .from('posts')
     .select()
     .in('profile_id', ownerProfileIds)
-    .gte('created_at', startDate.toISOString())
+    // .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -66,7 +66,7 @@ const fetchUserPosts = async (userId, startDate) => {
     .from('posts')
     .select()
     .eq('profile_id', userId)
-    .gte('created_at', startDate.toISOString())
+    // .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(50);
 

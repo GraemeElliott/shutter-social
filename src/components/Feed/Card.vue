@@ -160,7 +160,12 @@ onMounted(() => {
   <v-card :loading="loading" class="mx-auto my-9 sm:w-[470px]">
     <v-list-item class="pl-1.5 mt-2 mb-2">
       <template v-slot:prepend>
-        <v-avatar :image="`${imagePath}${profileAvatar}`"></v-avatar>
+        <RouterLink :to="`/profile/${profileUsername}`">
+          <v-avatar
+            class="mr-2"
+            :image="`${imagePath}${profileAvatar}`"
+          ></v-avatar>
+        </RouterLink>
 
         <RouterLink :to="`/profile/${profileUsername}`">
           <v-list-item-title class="font-semibold">{{
@@ -178,6 +183,7 @@ onMounted(() => {
       cover
       height="auto"
       :src="`${imagePath}${post.image_urls[0]}`"
+      class="cursor-pointer"
     ></v-img>
 
     <v-card-item class="flex pl-2">

@@ -15,28 +15,21 @@ const submit = async () => {
     <v-dialog
       v-model="postStore.dialog"
       fullscreen
-      :scrim="false"
+      :scrim="true"
       transition="dialog-bottom-transition"
+      :class="'sm:max-w-[1250px] sm:max-h-[1200px]'"
     >
       <template v-slot:activator="{ props }">
         <v-btn v-bind="props"> Create Post </v-btn>
       </template>
       <v-card>
-        <v-toolbar>
+        <v-toolbar class="bg-white">
           <v-btn icon dark @click="dialog = false">
             <v-icon
               icon="fa:fas fa-xmark"
               @click="postStore.handleCancel"
             ></v-icon>
           </v-btn>
-          <v-toolbar-title>Create Post</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-toolbar-items>
-            <v-btn variant="text" @click="postStore.handleCancel">
-              Cancel
-            </v-btn>
-            <v-btn variant="text" @click="submit">Save</v-btn>
-          </v-toolbar-items>
         </v-toolbar>
 
         <div class="d-flex align-center justify-center">
@@ -77,7 +70,7 @@ const submit = async () => {
                 />
               </div>
               <div class="flex justify-center">
-                <div class="w-50">
+                <div class="w-full">
                   <v-textarea
                     counter
                     auto-grow
@@ -87,6 +80,12 @@ const submit = async () => {
                     class="mx-auto"
                   ></v-textarea>
                 </div>
+              </div>
+              <div>
+                <v-btn @click="postStore.handleCancel" class="mr-4 bg-red">
+                  Cancel
+                </v-btn>
+                <v-btn @click="submit" class="bg-green">Save</v-btn>
               </div>
             </div>
             <div v-else class="spinner">
