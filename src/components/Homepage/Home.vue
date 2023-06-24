@@ -11,7 +11,7 @@ import AuthModal from './AuthModal.vue';
             Shutter Social
           </h1>
         </div>
-        <div class="mb-12">
+        <div class="mb-12 text-center">
           <h1 class="italic">A social media platform for photographers</h1>
         </div>
         <div>
