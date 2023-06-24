@@ -19,6 +19,7 @@ const onSearch = () => {
 
 const handleLogOut = async () => {
   await userStore.handleLogout();
+  router.push('/');
 };
 const navigateToRoot = () => {
   router.push('/');
@@ -34,24 +35,6 @@ const navigateToRoot = () => {
         >Shutter Social</a
       >
     </div>
-
-    <!-- <VContainer>
-      <VCard class="mx-auto" color="grey-lighten-3" max-width="900">
-        <VCardText>
-          <VTextField
-            density="compact"
-            variant="solo"
-            label="Search templates"
-            append-inner-icon="mdi-magnify"
-            single-line
-            hide-details
-            v-model="searchUsername"
-            @click:append-inner="onSearch"
-            @keydown.enter="onSearch"
-          ></VTextField>
-        </VCardText>
-      </VCard>
-    </VContainer> -->
 
     <div v-if="!loadingUser" class="flex items-center justify-center">
       <div v-if="user" class="flex items-center flex-wrap justify-center">
