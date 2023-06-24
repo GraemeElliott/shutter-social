@@ -35,23 +35,28 @@ const submit = async () => {
         <div class="d-flex align-center justify-center">
           <v-card-text class="text-center">
             <div v-if="!postStore.loading" class="flex flex-col justify-center">
-              <div class="flex flex-wrap items-center">
-                <div
+              <v-row>
+                <v-col
                   v-for="(image, index) in postStore.previewImages"
                   :key="index"
-                  class="w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/5 mb-6"
+                  class="d-flex child-flex flex-col"
+                  cols="12"
+                  sm="4"
                 >
-                  <div class="flex flex-col mr-4">
-                    <img :src="image" class="h-60 w-100 object-cover mb-2" />
-                    <v-btn
-                      @click="postStore.removeImage(index)"
-                      class="bg-red-700 text-white"
-                    >
-                      <v-icon icon="fa:fas fa-xmark"></v-icon>
-                    </v-btn>
-                  </div>
-                </div>
-              </div>
+                  <v-img
+                    :key="index"
+                    :src="image"
+                    aspect-ratio="1"
+                    cover
+                    class="bg-grey-lighten-2 mb-2"
+                  >
+                  </v-img>
+                  <v-btn @click="postStore.removeImage(index)" class="bg-red">
+                    <v-icon icon="fa:fas fa-xmark"></v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+
               <div class="flex justify-center mb-10">
                 <div>
                   <v-alert v-if="postStore.exceedsLimit" type="error">

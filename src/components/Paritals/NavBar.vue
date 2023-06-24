@@ -55,7 +55,7 @@ const navigateToRoot = () => {
 
     <div v-if="!loadingUser" class="flex items-center justify-center">
       <div v-if="user" class="flex items-center flex-wrap justify-center">
-        <UploadPost class="mr-2" />
+        <UploadPost class="mr-1 sm:mr-2" />
         <v-btn :to="`/profile/${user.username}`" class="mr-2">Profile</v-btn>
         <div v-if="user.isAdmin" class="mr-2">
           <v-btn class="w-full">Admin</v-btn>
