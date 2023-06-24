@@ -1,6 +1,11 @@
 <script setup>
 import GalleryCard from './GalleryCard.vue';
+import { useUserStore } from '../../stores/users';
+
+const userStore = useUserStore();
+
 const props = defineProps({
+  user: String,
   posts: Array,
   imagePath: String,
 });
@@ -12,7 +17,8 @@ const props = defineProps({
       v-for="post in props.posts"
       class="d-flex child-flex"
       cols="12"
-      sm="4"
+      md="6"
+      lg="4"
     >
       <GalleryCard
         :selectedPost="post"
@@ -20,6 +26,7 @@ const props = defineProps({
         :postMainImage="post.image_urls[0]"
         :image_urls="post.image_urls"
         :key="post.id"
+        :user="props.user"
       />
     </v-col>
   </v-row>
@@ -50,7 +57,6 @@ const props = defineProps({
   background-color: #ffff;
   opacity: 0.5;
 }
-
 .fa-chevron-right {
   font-size: 0.7rem;
 }

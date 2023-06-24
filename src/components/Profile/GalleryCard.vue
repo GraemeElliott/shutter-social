@@ -4,14 +4,19 @@ import { supabase } from '../../supabase';
 import { useUserStore } from '../../stores/users';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import { useRoute } from 'vue-router';
 
 const dialog = ref(false);
 const selectedPost = ref({});
 const model = ref(0);
 const editMode = ref(false);
+const maxCharacters = 2200;
+
+const route = useRoute();
 
 const userStore = useUserStore();
 const user = toRef(userStore, 'user');
+const { username: profileUsername } = route.params;
 
 dayjs.extend(relativeTime);
 
@@ -30,8 +35,8 @@ const openDialog = () => {
     editMode.value = false;
   }
 };
-const editPost = (post) => {
-  selectedPost.value = { ...post }; // Make a copy of the post to avoid modifying the original directly
+const editPost = () => {
+  selectedPost.value = { ...props.selectedPost }; // Make a copy of the post to avoid modifying the original directly
   editMode.value = true;
   dialog.value = true;
   model.value = 0; // Reset the carousel index when opening the dialog
@@ -91,43 +96,91 @@ const formatPostContent = (content) => {
         ></v-progress-circular>
       </v-row>
     </template>
-    <button icon class="edit-button" @click="editPost(post)">
+    <button
+      icon
+      class="edit-button"
+      @click="editPost(selectedPost)"
+      v-if="props.user.username === user.username"
+    >
       <v-icon icon="fa-solid fa-pen-to-square fa-sm"></v-icon>
     </button>
   </v-img>
-  <v-dialog v-model="dialog" max-width="1500">
-    <v-card v-if="selectedPost" class="flex flex-row">
-      <v-carousel
-        v-model="model"
-        hide-delimiter-background
-        class="w-50 h-100 mr-3"
-      >
-        <v-carousel-item
-          v-for="(imageUrl, index) in selectedPost.image_urls"
-          :key="imageUrl"
-          :value="index"
+  <v-dialog v-model="dialog" fullscreen>
+    <v-card v-if="selectedPost">
+      <div class="h-full overflow-y-auto lg:flex lg:flex-row lg:justify-center">
+        <v-carousel
+          v-model="model"
+          hide-delimiter-background
+          class="w-full h-full lg:w-2/5"
         >
-          <v-img
-            :src="`${imagePath}${imageUrl}`"
-            :aspect-ratio="1"
-            cover
-          ></v-img>
-        </v-carousel-item>
-      </v-carousel>
-      <div class="mt-8 w-50 flex flex-row">
-        <img
-          :key="user.id"
-          :src="`${imagePath}${user.avatar}`"
-          class="w-10 h-10 rounded-full"
-        />
-        <div class="mx-5">
-          <span class="mr-1 font-bold text-sm">{{ user.username }}</span>
-          <span
-            v-html="formatPostContent(selectedPost.post_content)"
-            class="text-sm"
-          ></span>
-          <div class="mt-2 text-sm text-gray-400">
-            Created: {{ dayjs(selectedPost.created_at).fromNow() }}
+          <v-carousel-item
+            v-for="(imageUrl, index) in selectedPost.image_urls"
+            :key="imageUrl"
+            :value="index"
+          >
+            <img
+              :src="`${imagePath}${imageUrl}`"
+              :aspect-ratio="1"
+              class="w-full h-full object-cover"
+              @click="(dialog = false), (editMode = false)"
+            />
+          </v-carousel-item>
+        </v-carousel>
+        <div class="post-details flex flex-col mt-4 mb-4 lg:w-2/5 lg:ml-4">
+          <div class="flex flex-row items-center mx-5 mt-2 mb-4">
+            <img
+              :key="user.id"
+              :src="`${imagePath}${props.user.avatar}`"
+              class="w-10 h-10 rounded-full mr-2"
+            />
+            <div class="mr-2 font-bold text-sm">{{ props.user.username }}</div>
+            <div class="text-sm text-gray-400">
+              Created: {{ dayjs(selectedPost.created_at).fromNow() }}
+            </div>
+            <v-icon
+              icon="fa-solid fa-xmark fa-sm"
+              class="text-lg hidden md:block"
+              style="position: absolute; top: 1rem; right: 1rem"
+              @click="(dialog = false), (editMode = false)"
+            ></v-icon>
+          </div>
+          <div class="border border-slate-200 mb-3"></div>
+
+          <template v-if="editMode">
+            <v-textarea
+              v-model="selectedPost.post_content"
+              counter
+              auto-grow
+              :maxlength="maxCharacters"
+              class="mx-3 l:mx-0 text-sm"
+            ></v-textarea>
+          </template>
+
+          <template v-else>
+            <div class="mx-5">
+              <span class="mr-1 font-bold text-sm">{{
+                props.user.username
+              }}</span>
+              <span
+                v-html="formatPostContent(selectedPost.post_content)"
+                class="text-sm"
+              ></span>
+            </div>
+          </template>
+
+          <div class="mb-4 ml-2 lg:ml-0 fixed bottom-0">
+            <template v-if="editMode && props.user.username === user.username">
+              <v-btn @click="savePost" class="mr-2">Save</v-btn>
+              <v-btn @click="editMode = false">Cancel</v-btn>
+            </template>
+            <template v-if="!editMode && props.user.username === user.username">
+              <div>
+                <v-btn @click="editMode = true" class="mr-2 mt-150">Edit</v-btn>
+                <v-btn @click="deletePost" class="bg-red-700 text-white"
+                  >Delete</v-btn
+                >
+              </div>
+            </template>
           </div>
         </div>
       </div>

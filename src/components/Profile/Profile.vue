@@ -110,7 +110,6 @@ const filteredPosts = computed(() => {
       />
       <ProfileGallery
         :user="user"
-        :userInfo="userInfo"
         :posts="filteredPosts"
         :imagePath="imagePath"
         :key="route.params.username"

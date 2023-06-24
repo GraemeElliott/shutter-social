@@ -64,7 +64,7 @@ const unFollowUser = async () => {
       <div
         class="mb-5 mt-3 text-center sm:text-left sm:mx-auto sm:max-w-screen-sm"
       >
-        <h1 class="font-bold">{{ props.user.username }}</h1>
+        <h1 class="font-bold">{{ props.user ? props.user.username : '' }}</h1>
         <h2>{{ props.user.bio }}</h2>
       </div>
       <div
@@ -87,7 +87,7 @@ const unFollowUser = async () => {
         </div>
       </div>
 
-      <div v-if="user.username === props.user.username">
+      <div v-if="user && user.username === props.user.username">
         <EditProfile :user="user" />
       </div>
       <div v-if="user">
