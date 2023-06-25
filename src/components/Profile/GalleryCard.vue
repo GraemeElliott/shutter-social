@@ -107,11 +107,11 @@ const formatPostContent = (content) => {
   </v-img>
   <v-dialog v-model="dialog" fullscreen>
     <v-card v-if="selectedPost">
-      <div class="h-full overflow-y-auto lg:flex lg:flex-row lg:justify-center">
+      <div class="h-full overflow-y-auto xl:flex xl:flex-row xl:justify-center">
         <v-carousel
           v-model="model"
           hide-delimiter-background
-          class="w-full h-full lg:w-2/5"
+          class="w-full h-full xl:w-2/5"
         >
           <v-carousel-item
             v-for="(imageUrl, index) in selectedPost.image_urls"
@@ -157,7 +157,7 @@ const formatPostContent = (content) => {
           </template>
 
           <template v-else>
-            <div class="mx-5">
+            <div class="mx-5 mb-5">
               <span class="mr-1 font-bold text-sm">{{
                 props.user.username
               }}</span>
@@ -168,7 +168,7 @@ const formatPostContent = (content) => {
             </div>
           </template>
 
-          <div class="mb-4 ml-2 lg:ml-0 fixed bottom-0">
+          <div class="mb-4 ml-2 lg:ml-0 mt-auto">
             <template v-if="editMode && props.user.username === user.username">
               <v-btn @click="savePost" class="mr-2">Save</v-btn>
               <v-btn @click="editMode = false">Cancel</v-btn>

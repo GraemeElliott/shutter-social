@@ -55,9 +55,9 @@ const props = defineProps({
     {{ user }}
     <v-dialog v-model="dialog" persistent width="1024">
       <template v-slot:activator="{ props }">
-        <v-btn v-bind="props" rounded="0">
+        <span v-bind="props" class="px-4 py-2 cursor-pointer">
           {{ isLogin ? 'Login' : 'Sign Up' }}
-        </v-btn>
+        </span>
       </template>
       <v-card style="padding: 50px">
         <form @submit.prevent="submit">
@@ -88,12 +88,17 @@ const props = defineProps({
           <v-alert v-if="errorMessage" type="error" class="mb-4">{{
             errorMessage
           }}</v-alert>
-          <div class="flex justify-end">
-            <v-btn class="me-4 bg-black" type="submit" :disabled="loading"
+          <div class="flex justify-center md:justify-end">
+            <v-btn
+              class="me-2 md:me-4 bg-black"
+              type="submit"
+              :disabled="loading"
               >Submit</v-btn
             >
             <v-btn @click="handleClear">Clear</v-btn>
-            <v-btn @click="handleClose" class="ml-auto bg-red-700 text-white"
+            <v-btn
+              @click="handleClose"
+              class="ml-2 md:ml-auto bg-red-700 text-white"
               >Cancel</v-btn
             >
           </div>

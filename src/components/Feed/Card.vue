@@ -158,7 +158,7 @@ onMounted(() => {
 
 <template>
   <v-card :loading="loading" class="mx-auto my-9 sm:w-[470px]">
-    <v-list-item class="pl-1.5 mt-2 mb-2">
+    <v-list-item class="pl-1.5 mb-2">
       <template v-slot:prepend>
         <RouterLink :to="`/profile/${profileUsername}`">
           <v-avatar
