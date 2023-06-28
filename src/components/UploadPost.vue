@@ -51,7 +51,10 @@ const submit = async () => {
                     class="bg-grey-lighten-2 mb-2"
                   >
                   </v-img>
-                  <v-btn @click="postStore.removeImage(index)" class="bg-red">
+                  <v-btn
+                    @click="postStore.removeImage(index)"
+                    class="bg-red-700 text-white"
+                  >
                     <v-icon icon="fa:fas fa-xmark"></v-icon>
                   </v-btn>
                 </v-col>

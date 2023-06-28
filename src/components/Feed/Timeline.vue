@@ -127,7 +127,7 @@ onMounted(() => {
     </div>
     <div v-else>
       <div class="flex justify-center">
-        <div class="max-w-screen-sm mx-auto">
+        <div class="max-w-screen-sm mx-3">
           <div v-for="post in posts" :key="post.id" class="mb-4">
             <Card
               :post="post"

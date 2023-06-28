@@ -5,7 +5,7 @@ import { useUserStore } from '../../stores/users';
 const userStore = useUserStore();
 
 const props = defineProps({
-  user: String,
+  user: Object,
   posts: Array,
   imagePath: String,
 });

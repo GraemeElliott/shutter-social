@@ -2,6 +2,7 @@
 import { ref, toRef } from 'vue';
 import { supabase } from '../../supabase';
 import { useUserStore } from '../../stores/users';
+import { usePostStore } from '../../stores/posts';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useRoute } from 'vue-router';
@@ -11,12 +12,15 @@ const selectedPost = ref({});
 const model = ref(0);
 const editMode = ref(false);
 const maxCharacters = 2200;
+const imagesToRemove = ref([]);
 
 const route = useRoute();
 
 const userStore = useUserStore();
 const user = toRef(userStore, 'user');
 const { username: profileUsername } = route.params;
+
+const postStore = usePostStore();
 
 dayjs.extend(relativeTime);
 
@@ -41,16 +45,30 @@ const editPost = () => {
   dialog.value = true;
   model.value = 0; // Reset the carousel index when opening the dialog
 };
-const savePost = async () => {
+const updatePost = async () => {
   const { data, error } = await supabase
     .from('posts')
-    .update({ post_content: selectedPost.value.post_content })
+    .update({
+      post_content: selectedPost.value.post_content,
+      image_urls: selectedPost.value.image_urls, // Update the image_urls property
+    })
     .eq('id', selectedPost.value.id);
+
   if (error) {
     throw new Error(error.message);
   }
+
+  // Remove images from selectedPost.image_urls
+  selectedPost.value.image_urls = selectedPost.value.image_urls.filter(
+    (imageUrl) => !imagesToRemove.value.includes(imageUrl)
+  );
+
+  // Clear the imagesToRemove list
+  imagesToRemove.value = [];
+
   editMode.value = false; // Exit edit mode
 };
+
 const deletePost = async () => {
   const postId = selectedPost.value.id; // Get the ID of the selected post
   const { data, error } = await supabase
@@ -78,6 +96,15 @@ const formatPostContent = (content) => {
 
   return postContent;
 };
+
+const addToRemoveList = (imageUrl, index) => {
+  imagesToRemove.value.push(imageUrl);
+  selectedPost.value.image_urls.splice(index, 1); // Remove the image URL from the array
+};
+
+const clearRemoveList = () => {
+  imagesToRemove.value = [];
+};
 </script>
 
 <template>
@@ -100,7 +127,7 @@ const formatPostContent = (content) => {
       icon
       class="edit-button"
       @click="editPost(selectedPost)"
-      v-if="props.user.username === user.username"
+      v-if="props.user.username === userStore.user.username"
     >
       <v-icon icon="fa-solid fa-pen-to-square fa-sm"></v-icon>
     </button>
@@ -108,7 +135,30 @@ const formatPostContent = (content) => {
   <v-dialog v-model="dialog" fullscreen>
     <v-card v-if="selectedPost">
       <div class="h-full overflow-y-auto xl:flex xl:flex-row xl:justify-center">
+        <div v-if="editMode" class="lg:w-full xl:w-1/2">
+          <div class="flex flex-wrap">
+            <div
+              v-for="(imageUrl, index) in selectedPost.image_urls"
+              :key="index"
+              class="w-full sm:w-1/2 md:w-1/5 xl:w-1/4 p-2"
+            >
+              <img
+                :src="`${imagePath}${imageUrl}`"
+                :aspect-ratio="1"
+                class="w-full h-auto aspect-square object-cover mb-2"
+                @click="(dialog = false), (editMode = false)"
+              />
+              <v-btn
+                class="bg-red-700 flex w-full text-white"
+                @click="addToRemoveList(imageUrl, index)"
+              >
+                <v-icon icon="fa:fas fa-xmark"></v-icon>
+              </v-btn>
+            </div>
+          </div>
+        </div>
         <v-carousel
+          v-else
           v-model="model"
           hide-delimiter-background
           class="w-full h-full xl:w-2/5"
@@ -126,7 +176,7 @@ const formatPostContent = (content) => {
             />
           </v-carousel-item>
         </v-carousel>
-        <div class="post-details flex flex-col mt-4 mb-4 lg:w-2/5 lg:ml-4">
+        <div class="post-details flex flex-col mt-4 mb-4 xl:w-2/5 lg:ml-4">
           <div class="flex flex-row items-center mx-5 mt-2 mb-4">
             <img
               :key="user.id"
@@ -139,7 +189,7 @@ const formatPostContent = (content) => {
             </div>
             <v-icon
               icon="fa-solid fa-xmark fa-sm"
-              class="text-lg hidden md:block"
+              class="text-lg hidden xl:block"
               style="position: absolute; top: 1rem; right: 1rem"
               @click="(dialog = false), (editMode = false)"
             ></v-icon>
@@ -170,8 +220,14 @@ const formatPostContent = (content) => {
 
           <div class="mb-4 ml-2 lg:ml-0 mt-auto">
             <template v-if="editMode && props.user.username === user.username">
-              <v-btn @click="savePost" class="mr-2">Save</v-btn>
-              <v-btn @click="editMode = false">Cancel</v-btn>
+              <v-btn @click="updatePost" class="mr-2">Save</v-btn>
+              <v-btn
+                @click="
+                  editMode = false;
+                  clearRemoveList();
+                "
+                >Cancel</v-btn
+              >
             </template>
             <template v-if="!editMode && props.user.username === user.username">
               <div>
