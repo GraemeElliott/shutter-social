@@ -1,11 +1,12 @@
 <script setup>
-import { ref, toRef } from 'vue';
+import { ref, toRef, computed } from 'vue';
 import { supabase } from '../../supabase';
 import { useUserStore } from '../../stores/users';
 import { usePostStore } from '../../stores/posts';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useRoute } from 'vue-router';
+import { v4 as uuidv4 } from 'uuid';
 
 const dialog = ref(false);
 const selectedPost = ref({});
@@ -13,6 +14,8 @@ const model = ref(0);
 const editMode = ref(false);
 const maxCharacters = 2200;
 const imagesToRemove = ref([]);
+const imagesToAdd = ref([]);
+const exceedsLimitError = ref(false);
 
 const route = useRoute();
 
@@ -50,7 +53,6 @@ const updatePost = async () => {
     .from('posts')
     .update({
       post_content: selectedPost.value.post_content,
-      image_urls: selectedPost.value.image_urls, // Update the image_urls property
     })
     .eq('id', selectedPost.value.id);
 
@@ -58,13 +60,64 @@ const updatePost = async () => {
     throw new Error(error.message);
   }
 
+  const newImageUrls = []; // Array to store new image URLs
+
+  for (const image of imagesToAdd.value) {
+    const fileName = uuidv4();
+    const fileData = image.split(',')[1]; // Extract the base64-encoded file data
+
+    // Convert the base64-encoded file data to a Blob object
+    const byteCharacters = atob(fileData);
+    const byteArrays = [];
+    for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+      const slice = byteCharacters.slice(offset, offset + 512);
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+    const blob = new Blob(byteArrays, { type: 'image/jpeg' }); // Modify the type if necessary
+
+    // Upload the image to the storage
+    const { data: imageData, error: imageError } = await supabase.storage
+      .from('images')
+      .upload(`public/${fileName}.jpg`, blob); // Modify the file extension if necessary
+
+    if (imageError) {
+      throw new Error('Unable to upload image');
+    }
+
+    newImageUrls.push(imageData.path); // Store the new image URL
+  }
+
+  // Combine the existing and new image URLs
+  const updatedImageUrls = [...selectedPost.value.image_urls, ...newImageUrls];
+
+  // Update the post with the new image URLs
+  const { data: updatedData, error: updatedError } = await supabase
+    .from('posts')
+    .update({
+      image_urls: updatedImageUrls,
+    })
+    .eq('id', selectedPost.value.id);
+
+  if (updatedError) {
+    throw new Error(updatedError.message);
+  }
+
   // Remove images from selectedPost.image_urls
   selectedPost.value.image_urls = selectedPost.value.image_urls.filter(
     (imageUrl) => !imagesToRemove.value.includes(imageUrl)
   );
 
-  // Clear the imagesToRemove list
+  // Add newly uploaded image URLs to selectedPost.image_urls
+  selectedPost.value.image_urls.push(...newImageUrls);
+
+  // Clear the imagesToRemove and imagesToAdd lists
   imagesToRemove.value = [];
+  imagesToAdd.value = [];
 
   editMode.value = false; // Exit edit mode
 };
@@ -102,8 +155,70 @@ const addToRemoveList = (imageUrl, index) => {
   selectedPost.value.image_urls.splice(index, 1); // Remove the image URL from the array
 };
 
+const restoreRemovedImages = () => {
+  selectedPost.value.image_urls.push(...imagesToRemove.value);
+  imagesToRemove.value = [];
+};
+
 const clearRemoveList = () => {
   imagesToRemove.value = [];
+};
+
+const handleImageSelection = (event) => {
+  const files = event.target.files; // Get the selected files
+  const allowedImages = 10 - selectedPost.value.image_urls.length;
+
+  if (totalImages.value >= 10) {
+    exceedsLimitError.value = true; // Set the value of exceedsLimitError to true
+    setTimeout(() => {
+      exceedsLimitError.value = false; // Reset the value of exceedsLimitError to false
+    }, 3000);
+    return;
+  }
+
+  for (let i = 0; i < files.length; i++) {
+    if (imagesToAdd.value.length >= allowedImages) {
+      // Maximum limit reached, do not add more images
+      break;
+    }
+
+    const file = files[i];
+    // Perform any necessary validations on the file (e.g., file size, file type) here
+
+    // Convert the file to a Base64 data URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataURL = e.target.result;
+      // Add the data URL to the imagesToAdd array
+      if (imagesToAdd.value.length < allowedImages) {
+        imagesToAdd.value.push(dataURL);
+      }
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+const removeFromAddList = (index) => {
+  imagesToAdd.value.splice(index, 1); // Remove the image URL from the array
+};
+
+const totalImages = computed(() => {
+  if (selectedPost.value && imagesToAdd.value) {
+    return selectedPost.value.image_urls.length + imagesToAdd.value.length;
+  }
+  return 0;
+});
+
+const exceedsLimit = computed(() => {
+  return exceedsLimitError.value;
+});
+
+const clearExceedsLimitError = () => {
+  exceedsLimit.value = false;
+};
+
+const clearImagesToAdd = () => {
+  imagesToAdd.value = [];
 };
 </script>
 
@@ -156,6 +271,40 @@ const clearRemoveList = () => {
               </v-btn>
             </div>
           </div>
+          <div v-if="imagesToAdd.length > 0" class="selected-images w-full">
+            <div class="flex flex-wrap">
+              <div
+                v-for="(dataURL, index) in imagesToAdd"
+                :key="index"
+                class="selected-image w-full sm:w-1/2 md:w-1/5 xl:w-1/4 p-2"
+              >
+                <img
+                  :src="dataURL"
+                  :aspect-ratio="1"
+                  alt="Selected Image"
+                  class="selected-image-thumbnail w-full h-auto aspect-square object-cover mb-2"
+                />
+                <v-btn
+                  @click="removeFromAddList(index)"
+                  class="bg-red-700 text-white w-full"
+                >
+                  <v-icon icon="fa:fas fa-xmark"></v-icon>
+                </v-btn>
+              </div>
+              <div class="flex justify-center mb-10">
+                <div class="flex justify-center mb-10">
+                  <v-alert
+                    v-if="exceedsLimit"
+                    type="error"
+                    dismissible
+                    @input="clearExceedsLimitError"
+                  >
+                    You have exceeded the maximum number of files allowed (10).
+                  </v-alert>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
         <v-carousel
           v-else
@@ -191,7 +340,10 @@ const clearRemoveList = () => {
               icon="fa-solid fa-xmark fa-sm"
               class="text-lg hidden xl:block"
               style="position: absolute; top: 1rem; right: 1rem"
-              @click="(dialog = false), (editMode = false)"
+              @click="
+                (dialog = false), (editMode = false), restoreRemovedImages();
+                clearRemoveList(), clearImagesToAdd();
+              "
             ></v-icon>
           </div>
           <div class="border border-slate-200 mb-3"></div>
@@ -219,17 +371,38 @@ const clearRemoveList = () => {
           </template>
 
           <div class="mb-4 ml-2 lg:ml-0 mt-auto">
-            <template v-if="editMode && props.user.username === user.username">
+            <template
+              v-if="editMode && props.user.username === userStore.user.username"
+            >
+              <div>
+                <label for="file-input" class="custom-button mb-6"
+                  >ADD IMAGES</label
+                >
+                <input
+                  type="file"
+                  accept=".jpg, .png"
+                  multiple
+                  @change="handleImageSelection"
+                  id="file-input"
+                  class="file-input"
+                />
+              </div>
               <v-btn @click="updatePost" class="mr-2">Save</v-btn>
               <v-btn
                 @click="
-                  editMode = false;
+                  restoreRemovedImages();
                   clearRemoveList();
+                  clearImagesToAdd();
+                  editMode = false;
                 "
                 >Cancel</v-btn
               >
             </template>
-            <template v-if="!editMode && props.user.username === user.username">
+            <template
+              v-if="
+                !editMode && props.user.username === userStore.user.username
+              "
+            >
               <div>
                 <v-btn @click="editMode = true" class="mr-2 mt-150">Edit</v-btn>
                 <v-btn @click="deletePost" class="bg-red-700 text-white"
@@ -243,3 +416,28 @@ const clearRemoveList = () => {
     </v-card>
   </v-dialog>
 </template>
+
+<style scoped>
+.dialog-bottom-transition-enter-active,
+.dialog-bottom-transition-leave-active {
+  transition: transform 0.2s ease-in-out;
+}
+input {
+  margin-top: 10px;
+}
+
+.custom-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+</style>
