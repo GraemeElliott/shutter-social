@@ -92,7 +92,7 @@ const unFollowUser = async () => {
       </div>
       <div v-if="user">
         <div v-if="user.username !== profileUsername">
-          <div>
+          <div class="flex flex-row justify-center">
             <v-btn
               v-if="!props.isFollowing"
               @click="followUser"
