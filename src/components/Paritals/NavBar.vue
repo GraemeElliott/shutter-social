@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import UploadPost from '../UploadPost.vue';
 import { useUserStore } from '../../stores/users';
 import { storeToRefs } from 'pinia';
+const imagePath = import.meta.env.VITE_IMAGE_PATH;
 
 const userStore = useUserStore();
 const { user, loadingUser } = storeToRefs(userStore);
@@ -29,14 +30,29 @@ const handleLogOut = async () => {
         <div class="flex items-center">
           <!-- Logo -->
           <div class="flex-shrink-0">
-            <a href="/" @click="navigateToRoot" class="ss-logo-header"
+            <a
+              href="/"
+              @click="navigateToRoot"
+              class="ss-logo-header text-xl md:text-3xl"
               >Shutter Social</a
             >
           </div>
         </div>
 
         <!-- Mobile menu toggle -->
-        <div class="flex md:hidden">
+        <div class="flex md:hidden items-center">
+          <RouterLink :to="`/profile/${userStore.user.username}`">
+            <v-avatar
+              class=""
+              :image="`${imagePath}${userStore.user.avatar}`"
+            ></v-avatar>
+          </RouterLink>
+
+          <div v-if="user.isAdmin" class="mr-2">
+            <RouterLink :to="`/`" class="hover:text-gray-400">
+              <v-icon icon="fa-solid fa-user-gear" class="mx-2 mb-1"></v-icon>
+            </RouterLink>
+          </div>
           <button
             @click="isMobileMenuOpen = !isMobileMenuOpen"
             class="inline-flex items-center justify-center p-2 rounded-md focus:outline-none transition duration-150 ease-in-out"
@@ -83,11 +99,18 @@ const handleLogOut = async () => {
                 class="flex items-center flex-wrap justify-center"
               >
                 <UploadPost class="mr-1 sm:mr-2" />
-                <v-btn :to="`/profile/${user.username}`" class="mr-2"
-                  >Profile</v-btn
-                >
+
+                <RouterLink :to="`/profile/${userStore.user.username}`">
+                  <v-avatar
+                    class="mx-2"
+                    :image="`${imagePath}${userStore.user.avatar}`"
+                  ></v-avatar>
+                </RouterLink>
+
                 <div v-if="user.isAdmin" class="mr-2">
-                  <v-btn class="w-full">Admin</v-btn>
+                  <RouterLink :to="`/`" class="mr-2 hover:text-gray-400">
+                    <v-icon icon="fa-solid fa-user-gear" class="mx-2"></v-icon>
+                  </RouterLink>
                 </div>
                 <v-btn
                   @click="handleLogOut"
@@ -111,15 +134,11 @@ const handleLogOut = async () => {
           v-if="!loadingUser"
           class="flex flex-col justify-center items-center"
         >
-          <div v-if="user">
-            <UploadPost class="mb-2 mt-2 w-full ml-0" />
-            <v-btn :to="`/profile/${user.username}`" class="mb-2 w-full"
-              >Profile</v-btn
-            >
-            <div v-if="user.isAdmin">
-              <v-btn class="mb-2 w-full">Admin</v-btn>
-            </div>
-            <v-btn @click="handleLogOut" class="bg-red-700 text-white w-full"
+          <div v-if="user" class="flex flex-col items-center">
+            <UploadPost class="mb-2 w-full" />
+            <v-btn
+              @click="handleLogOut"
+              class="bg-red-700 text-white w-full mb-2"
               >Logout</v-btn
             >
           </div>
