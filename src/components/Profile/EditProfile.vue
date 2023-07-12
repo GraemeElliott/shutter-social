@@ -16,6 +16,12 @@ const dialog = ref(false);
 
 const user = ref({ ...props.user });
 
+const errorMessage = ref('');
+
+const clearErrorMessage = () => {
+  errorMessage.value = '';
+};
+
 const maxCharacters = 150;
 const postContent = ref('');
 
@@ -80,9 +86,37 @@ const saveUser = async () => {
     }
 
     dialog.value = false; // Close the dialog after a successful update
+    window.location.href = `/profile/${user.value.username}`;
   } catch (error) {
     console.error('Error updating user:', error);
+
+    if (
+      error.message.includes(
+        'duplicate key value violates unique constraint "users_username_key"'
+      )
+    ) {
+      errorMessage.value = 'Username already exists';
+    } else if (
+      error.message.includes(
+        'duplicate key value violates unique constraint "users_email_key"'
+      )
+    ) {
+      errorMessage.value = 'Email address already exists';
+    } else {
+      errorMessage.value = 'An error occurred';
+    }
+    setTimeout(clearErrorMessage, 3000);
   }
+};
+
+const resetForm = () => {
+  user.value = { ...props.user }; // Reset the user object to its initial state
+  selectedImage.value = null; // Reset the selected image
+};
+
+const handleCancel = () => {
+  resetForm(); // Reset the form fields
+  dialog.value = false; // Close the dialog
 };
 </script>
 
@@ -95,9 +129,6 @@ const saveUser = async () => {
         </v-btn>
       </template>
       <v-card>
-        <v-card-title>
-          <span class="text-h5"> Edit User Profile</span>
-        </v-card-title>
         <v-card-text>
           <div>
             <v-row>
@@ -150,9 +181,13 @@ const saveUser = async () => {
                   persistent-hint
                   :maxlength="maxCharacters"
                   counter
+                  auto-grow
                   required
                 ></v-textarea>
               </v-col>
+              <v-alert v-if="errorMessage" type="error" class="mb-4">
+                {{ errorMessage }}
+              </v-alert>
             </v-row>
           </div>
         </v-card-text>
@@ -161,7 +196,7 @@ const saveUser = async () => {
           <v-btn
             class="bg-red-700 text-white"
             variant="text"
-            @click="dialog = false"
+            @click="handleCancel"
             >Cancel</v-btn
           >
           <v-btn

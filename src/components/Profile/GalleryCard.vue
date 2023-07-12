@@ -3,6 +3,7 @@ import { ref, toRef, computed } from 'vue';
 import { supabase } from '../../supabase';
 import { useUserStore } from '../../stores/users';
 import { usePostStore } from '../../stores/posts';
+import PostActions from '../Feed/PostActions.vue';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useRoute } from 'vue-router';
@@ -16,6 +17,7 @@ const maxCharacters = 2200;
 const imagesToRemove = ref([]);
 const imagesToAdd = ref([]);
 const exceedsLimitError = ref(false);
+const loading = ref(false);
 
 const route = useRoute();
 
@@ -49,6 +51,7 @@ const editPost = () => {
   model.value = 0; // Reset the carousel index when opening the dialog
 };
 const updatePost = async () => {
+  loading.value = true;
   const { data, error } = await supabase
     .from('posts')
     .update({
@@ -57,6 +60,7 @@ const updatePost = async () => {
     .eq('id', selectedPost.value.id);
 
   if (error) {
+    loading.value = false;
     throw new Error(error.message);
   }
 
@@ -86,6 +90,7 @@ const updatePost = async () => {
       .upload(`public/${fileName}.jpg`, blob); // Modify the file extension if necessary
 
     if (imageError) {
+      loading.value = false;
       throw new Error('Unable to upload image');
     }
 
@@ -104,6 +109,7 @@ const updatePost = async () => {
     .eq('id', selectedPost.value.id);
 
   if (updatedError) {
+    loading.value = false;
     throw new Error(updatedError.message);
   }
 
@@ -118,6 +124,8 @@ const updatePost = async () => {
   // Clear the imagesToRemove and imagesToAdd lists
   imagesToRemove.value = [];
   imagesToAdd.value = [];
+
+  loading.value = false;
 
   editMode.value = false; // Exit edit mode
 };
@@ -227,7 +235,7 @@ const clearImagesToAdd = () => {
     :src="`${imagePath}${postMainImage}`"
     aspect-ratio="1"
     cover
-    class="bg-grey-lighten-2"
+    class="bg-grey-lighten-2 cursor-pointer"
     @click="openDialog(post)"
   >
     <template v-slot:placeholder>
@@ -249,63 +257,75 @@ const clearImagesToAdd = () => {
   </v-img>
   <v-dialog v-model="dialog" fullscreen>
     <v-card v-if="selectedPost">
-      <div class="h-full overflow-y-auto xl:flex xl:flex-row xl:justify-center">
+      <div
+        class="xl:h-full xl:overflow-y-auto xl:flex xl:flex-row xl:justify-center"
+      >
         <div v-if="editMode" class="lg:w-full xl:w-1/2">
-          <div class="flex flex-wrap">
-            <div
-              v-for="(imageUrl, index) in selectedPost.image_urls"
-              :key="index"
-              class="w-full sm:w-1/2 md:w-1/5 xl:w-1/4 p-2"
-            >
-              <img
-                :src="`${imagePath}${imageUrl}`"
-                :aspect-ratio="1"
-                class="w-full h-auto aspect-square object-cover mb-2"
-                @click="(dialog = false), (editMode = false)"
-              />
-              <v-btn
-                class="bg-red-700 flex w-full text-white"
-                @click="addToRemoveList(imageUrl, index)"
-              >
-                <v-icon icon="fa:fas fa-xmark"></v-icon>
-              </v-btn>
-            </div>
+          <div v-if="loading" class="spinner">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+            ></v-progress-circular>
           </div>
-          <div v-if="imagesToAdd.length > 0" class="selected-images w-full">
+          <div v-else>
             <div class="flex flex-wrap">
               <div
-                v-for="(dataURL, index) in imagesToAdd"
+                v-for="(imageUrl, index) in selectedPost.image_urls"
                 :key="index"
-                class="selected-image w-full sm:w-1/2 md:w-1/5 xl:w-1/4 p-2"
+                class="w-full sm:w-1/2 md:w-1/5 xl:w-1/4 p-2"
               >
                 <img
-                  :src="dataURL"
+                  :src="`${imagePath}${imageUrl}`"
                   :aspect-ratio="1"
-                  alt="Selected Image"
-                  class="selected-image-thumbnail w-full h-auto aspect-square object-cover mb-2"
+                  class="w-full h-auto aspect-square object-cover mb-2"
+                  @click="(dialog = false), (editMode = false)"
                 />
                 <v-btn
-                  @click="removeFromAddList(index)"
-                  class="bg-red-700 text-white w-full"
+                  class="bg-red-700 flex w-full text-white"
+                  @click="addToRemoveList(imageUrl, index)"
                 >
                   <v-icon icon="fa:fas fa-xmark"></v-icon>
                 </v-btn>
               </div>
-              <div class="flex justify-center mb-10">
-                <div class="flex justify-center mb-10">
-                  <v-alert
-                    v-if="exceedsLimit"
-                    type="error"
-                    dismissible
-                    @input="clearExceedsLimitError"
+            </div>
+            <div v-if="imagesToAdd.length > 0" class="selected-images w-full">
+              <div class="flex flex-wrap">
+                <div
+                  v-for="(dataURL, index) in imagesToAdd"
+                  :key="index"
+                  class="selected-image w-full sm:w-1/2 md:w-1/5 xl:w-1/4 p-2"
+                >
+                  <img
+                    :src="dataURL"
+                    :aspect-ratio="1"
+                    alt="Selected Image"
+                    class="selected-image-thumbnail w-full h-auto aspect-square object-cover mb-2"
+                  />
+                  <v-btn
+                    @click="removeFromAddList(index)"
+                    class="bg-red-700 text-white w-full"
                   >
-                    You have exceeded the maximum number of files allowed (10).
-                  </v-alert>
+                    <v-icon icon="fa:fas fa-xmark"></v-icon>
+                  </v-btn>
+                </div>
+                <div class="flex justify-center mb-10">
+                  <div class="flex justify-center mb-10">
+                    <v-alert
+                      v-if="exceedsLimit"
+                      type="error"
+                      dismissible
+                      @input="clearExceedsLimitError"
+                    >
+                      You have exceeded the maximum number of files allowed
+                      (10).
+                    </v-alert>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
         <v-carousel
           v-else
           v-model="model"
@@ -404,6 +424,7 @@ const clearImagesToAdd = () => {
               "
             >
               <div>
+                <PostActions :post="props.selectedPost" />
                 <v-btn @click="editMode = true" class="mr-2 mt-150">Edit</v-btn>
                 <v-btn @click="deletePost" class="bg-red-700 text-white"
                   >Delete</v-btn
@@ -439,5 +460,12 @@ input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
+}
+
+.spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
 }
 </style>

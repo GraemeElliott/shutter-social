@@ -5,7 +5,6 @@ import { useUserStore } from '../../stores/users';
 import { storeToRefs } from 'pinia';
 import { supabase } from '../../supabase';
 import { useRouter } from 'vue-router';
-import Home from '../Homepage/Home.vue';
 
 const userStore = useUserStore();
 
@@ -35,7 +34,6 @@ const fetchPostUsernames = async () => {
 const fetchPostsByTag = async (tagname) => {
   posts.value = [];
 
-  // Fetch posts with the specified tag
   const { data: taggedPosts } = await supabase
     .from('posts')
     .select()
@@ -48,12 +46,10 @@ const fetchPostsByTag = async (tagname) => {
 };
 
 const fetchPostsFromFollowedUsers = async (ownerProfileIds, startDate) => {
-  // Fetch posts from followed users
   const { data: followedUsersPosts } = await supabase
     .from('posts')
     .select()
     .in('profile_id', ownerProfileIds)
-    // .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -61,12 +57,10 @@ const fetchPostsFromFollowedUsers = async (ownerProfileIds, startDate) => {
 };
 
 const fetchUserPosts = async (userId, startDate) => {
-  // Fetch user's own posts
   const { data: userPosts } = await supabase
     .from('posts')
     .select()
     .eq('profile_id', userId)
-    // .gte('created_at', startDate.toISOString())
     .order('created_at', { ascending: false })
     .limit(50);
 
@@ -122,10 +116,7 @@ onMounted(() => {
 
 <template>
   <div v-if="!loadingUser">
-    <div v-if="!user">
-      <Home />
-    </div>
-    <div v-else>
+    <div>
       <div class="flex justify-center">
         <div class="max-w-screen-sm mx-3">
           <div v-for="post in posts" :key="post.id" class="mb-4">
@@ -141,16 +132,9 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  <div v-else class="spinner">
+  <div v-else class="flex align-middle justify-center h-120">
     <v-progress-circular indeterminate color="primary"></v-progress-circular>
   </div>
 </template>
 
-<style scoped>
-.spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 120px;
-}
-</style>
+<style scoped></style>

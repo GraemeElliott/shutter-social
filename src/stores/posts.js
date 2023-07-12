@@ -1,134 +1,198 @@
+import { ref, computed } from 'vue';
 import { defineStore } from 'pinia';
 import { supabase } from '../supabase';
 import { v4 as uuidv4 } from 'uuid';
 import { useUserStore } from './users';
 
-export const usePostStore = defineStore('post', {
-  state: () => ({
-    posts: [],
-    postContent: '',
-    previewImages: [],
-    exceedsLimit: false,
-    file: null,
-    loading: false,
-    errorMessage: '',
-    alertTimeout: null,
-    dialog: false,
-    maxFiles: 10,
-  }),
-  actions: {
-    async fetchPosts() {
-      const { data: postsData } = await supabase
-        .from('posts')
-        .select()
-        .order('created_at', { ascending: false }); // Sort the posts in descending order based on the 'created_at' column
+export const usePostStore = defineStore('post', (/* provide, options */) => {
+  const userStore = useUserStore(); // Access the user store directly
+  const posts = ref([]);
+  const postContent = ref('');
+  const previewImages = ref([]);
+  const exceedsLimit = ref(false);
+  const file = ref(null);
+  const loading = ref(false);
+  const errorMessage = ref('');
+  const alertTimeout = ref(null);
+  const dialog = ref(false);
+  const maxFiles = ref(10);
 
-      this.posts = postsData;
-    },
+  const fetchPosts = async () => {
+    const { data: postsData } = await supabase
+      .from('posts')
+      .select()
+      .order('created_at', { ascending: false });
+    posts.value = postsData;
+  };
 
-    async addPost(post) {
-      await supabase.from('posts').insert(post);
+  const addPost = async (post) => {
+    await supabase.from('posts').insert(post);
+    await fetchPosts();
+  };
 
-      // Fetch posts again to update the state
-      await this.fetchPosts();
-    },
+  const handleCancel = async () => {
+    dialog.value = false;
+    postContent.value = '';
+    previewImages.value = [];
+  };
 
-    async handleCancel() {
-      this.dialog = false;
-      this.postContent = '';
-      this.previewImages = [];
-    },
+  const handleUploadChange = async (event) => {
+    const files = event.target.files;
+    const fileCount = files.length;
+    // Check if the number of selected files exceeds the limit
+    if (previewImages.value.length + fileCount > maxFiles.value) {
+      exceedsLimit.value = true;
+      // Clear the previous timeout (if any)
+      clearTimeout(alertTimeout.value);
+      // Set a new timeout to hide the alert after 5 seconds
+      alertTimeout.value = setTimeout(() => {
+        exceedsLimit.value = false;
+      }, 3000);
+      return;
+    }
 
-    async handleUploadChange(event) {
-      const files = event.target.files;
-      const fileCount = files.length;
-      // Check if the number of selected files exceeds the limit
-      if (this.previewImages.length + fileCount > this.maxFiles) {
-        this.exceedsLimit = true;
-        // Clear the previous timeout (if any)
-        clearTimeout(this.alertTimeout);
-        // Set a new timeout to hide the alert after 5 seconds
-        this.alertTimeout = setTimeout(() => {
-          this.exceedsLimit = false;
-        }, 3000);
+    // Perform operations for each file
+    for (let i = 0; i < fileCount; i++) {
+      file.value = files[i];
+      // Read the file as a data URL
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        // Add the data URL to the preview images array
+        previewImages.value.push(dataUrl);
+      };
+      reader.readAsDataURL(file.value);
+    }
+  };
+
+  const removeImage = async (index) => {
+    previewImages.value.splice(index, 1);
+  };
+
+  const submit = async (router) => {
+    loading.value = true;
+    const imageUrls = [];
+    for (const image of previewImages.value) {
+      const fileName = uuidv4();
+      const fileData = image.split(',')[1];
+      const byteCharacters = atob(fileData);
+      const byteArrays = [];
+      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+        const slice = byteCharacters.slice(offset, offset + 512);
+        const byteNumbers = new Array(slice.length);
+        for (let i = 0; i < slice.length; i++) {
+          byteNumbers[i] = slice.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        byteArrays.push(byteArray);
+      }
+      const blob = new Blob(byteArrays, { type: 'image/jpeg' });
+      const { data, error } = await supabase.storage
+        .from('images')
+        .upload(`public/${fileName}.jpg`, blob);
+      if (error) {
+        loading.value = false;
+        errorMessage.value = 'Unable to upload image';
         return;
       }
-      // Perform operations for each file
-      for (let i = 0; i < fileCount; i++) {
-        this.file = files[i];
-        // Read the file as a data URL
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target.result;
-          // Add the data URL to the preview images array
-          this.previewImages.push(dataUrl);
-        };
-        reader.readAsDataURL(this.file);
+      imageUrls.push(data.path);
+    }
+    const newPost = await supabase.from('posts').insert({
+      image_urls: imageUrls,
+      post_content: postContent.value,
+      profile_id: userStore.user.id,
+    });
+    if (newPost.error) {
+      loading.value = false;
+      errorMessage.value = 'Unable to create post';
+      return;
+    }
+    await addPost(newPost.data);
+    loading.value = false;
+    handleCancel();
+    await fetchPosts();
+    const username = userStore.user.username;
+    router.push(`/profile/${username}`);
+  };
+
+  const likesCount = ref({});
+
+  const likePost = async (postId) => {
+    await supabase.from('liked_posts').insert({
+      liked_by_id: userStore.user.id,
+      liked_post_id: postId,
+    });
+    likesCount.value[postId]++;
+  };
+
+  const unlikePost = async (postId) => {
+    await supabase
+      .from('liked_posts')
+      .delete()
+      .eq('liked_by_id', userStore.user.id)
+      .eq('liked_post_id', postId);
+    likesCount.value[postId]--;
+  };
+
+  const countLikes = async (postId) => {
+    const { count } = await supabase
+      .from('liked_posts')
+      .select('*', { count: 'exact' })
+      .eq('liked_post_id', postId);
+    likesCount.value[postId] = count;
+  };
+
+  const formattedLikesCount = computed(() => {
+    return (postId) => {
+      const count = likesCount.value[postId];
+      if (count === 0) {
+        return 'Be the first to like this post';
+      } else if (count === 1) {
+        return '1 like';
+      } else {
+        return `${count} likes`;
       }
-    },
+    };
+  });
 
-    async removeImage(index) {
-      this.previewImages.splice(index, 1);
-    },
+  const savePost = async (postId) => {
+    await supabase.from('saved_posts').insert({
+      saved_by_id: userStore.user.id,
+      saved_post_id: postId,
+    });
+  };
 
-    async submit(router) {
-      const userStore = useUserStore();
-      this.loading = true;
+  const unsavePost = async (postId) => {
+    await supabase
+      .from('saved_posts')
+      .delete()
+      .eq('saved_by_id', userStore.user.id)
+      .eq('saved_post_id', postId);
+  };
 
-      const imageUrls = []; // Array to store image URLs
-
-      for (const image of this.previewImages) {
-        const fileName = uuidv4();
-        const fileData = image.split(',')[1]; // Extract the base64-encoded file data
-
-        // Convert the base64-encoded file data to a Blob object
-        const byteCharacters = atob(fileData);
-        const byteArrays = [];
-        for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-          const slice = byteCharacters.slice(offset, offset + 512);
-          const byteNumbers = new Array(slice.length);
-          for (let i = 0; i < slice.length; i++) {
-            byteNumbers[i] = slice.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          byteArrays.push(byteArray);
-        }
-        const blob = new Blob(byteArrays, { type: 'image/jpeg' }); // Modify the type if necessary
-
-        // Upload the image to the storage
-        const { data, error } = await supabase.storage
-          .from('images')
-          .upload(`public/${fileName}.jpg`, blob); // Modify the file extension if necessary
-
-        if (error) {
-          this.loading = false;
-          this.errorMessage = 'Unable to upload image';
-          return;
-        }
-
-        imageUrls.push(data.path); // Store the image URL
-      }
-
-      // Insert the post details and image URLs into the "posts" table
-      const newPost = await supabase.from('posts').insert({
-        image_urls: imageUrls,
-        post_content: this.postContent,
-        profile_id: userStore.user.id,
-      });
-
-      if (newPost.error) {
-        this.loading = false;
-        this.errorMessage = 'Unable to create post';
-        return;
-      }
-
-      await this.addPost(newPost.data);
-
-      this.loading = false;
-      this.handleCancel();
-      await this.fetchPosts();
-      const username = userStore.user.username;
-      router.push(`/profile/${username}`);
-    },
-  },
+  return {
+    fetchPosts,
+    addPost,
+    handleCancel,
+    handleUploadChange,
+    removeImage,
+    submit,
+    likePost,
+    unlikePost,
+    countLikes,
+    savePost,
+    unsavePost,
+    likesCount,
+    formattedLikesCount,
+    posts,
+    postContent,
+    previewImages,
+    exceedsLimit,
+    file,
+    loading,
+    errorMessage,
+    alertTimeout,
+    dialog,
+    maxFiles,
+  };
 });

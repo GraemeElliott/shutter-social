@@ -1,4 +1,5 @@
 <script setup>
+import Spinner from './Paritals/Spinner.vue';
 import { usePostStore } from '../stores/posts';
 import { useRouter } from 'vue-router';
 
@@ -16,32 +17,32 @@ const submit = async () => {
       v-model="postStore.dialog"
       fullscreen
       :scrim="true"
-      transition="dialog-bottom-transition"
-      :class="'sm:max-w-[1250px] sm:max-h-[1200px]'"
+      :class="'w.full h-full'"
     >
       <template v-slot:activator="{ props }">
         <v-btn v-bind="props"> Create Post </v-btn>
       </template>
       <v-card>
-        <v-toolbar class="bg-white">
-          <v-btn icon dark @click="dialog = false">
-            <v-icon
-              icon="fa:fas fa-xmark"
-              @click="postStore.handleCancel"
-            ></v-icon>
-          </v-btn>
+        <v-toolbar class="bg-white justify-end">
+          <v-icon
+            icon="fa:fas fa-xmark"
+            class="text-lg hidden xl:block"
+            style="position: absolute; top: 1rem; right: 1rem"
+            @click="postStore.handleCancel"
+          ></v-icon>
         </v-toolbar>
 
         <div class="d-flex align-center justify-center">
           <v-card-text class="text-center">
             <div v-if="!postStore.loading" class="flex flex-col justify-center">
-              <v-row>
+              <v-row class="flex justify-center">
                 <v-col
                   v-for="(image, index) in postStore.previewImages"
                   :key="index"
                   class="d-flex child-flex flex-col"
                   cols="12"
                   sm="4"
+                  lg="1"
                 >
                   <v-img
                     :key="index"
@@ -81,7 +82,7 @@ const submit = async () => {
                 />
               </div>
               <div class="flex justify-center">
-                <div class="w-full">
+                <div class="w-1/2">
                   <v-textarea
                     counter
                     auto-grow
@@ -104,11 +105,8 @@ const submit = async () => {
                 >
               </div>
             </div>
-            <div v-else class="spinner">
-              <v-progress-circular
-                indeterminate
-                color="primary"
-              ></v-progress-circular>
+            <div v-else>
+              <Spinner />
             </div>
           </v-card-text>
         </div>
@@ -139,12 +137,5 @@ input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
-}
-
-.spinner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 120px;
 }
 </style>

@@ -151,7 +151,6 @@ const handleLogOut = async () => {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Bungee&family=PT+Sans&display=swap');
 .ss-logo-header {
-  font-size: 2rem;
   font-family: 'Bungee', cursive;
 }
 </style>
