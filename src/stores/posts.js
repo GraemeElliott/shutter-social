@@ -23,9 +23,13 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
     posts.value = postsData;
   };
   const addPost = async (post) => {
-    await supabase.from('posts').insert(post);
-    await fetchPosts();
+    const { data, error } = await supabase.from('posts').insert(post);
+    if (error) {
+      throw new Error(error.message);
+    }
+    location.reload();
   };
+
   const handleCancel = async () => {
     dialog.value = false;
     postContent.value = '';
@@ -100,11 +104,9 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       return;
     }
     await addPost(newPost.data);
+    await fetchPosts();
     loading.value = false;
     handleCancel();
-    await fetchPosts();
-    const username = userStore.user.username;
-    router.push(`/profile/${username}`);
   };
   const likesCount = ref({});
   const likePost = async (postId) => {
