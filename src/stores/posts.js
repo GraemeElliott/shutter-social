@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 import { supabase } from '../supabase';
 import { v4 as uuidv4 } from 'uuid';
 import { useUserStore } from './users';
-
 export const usePostStore = defineStore('post', (/* provide, options */) => {
   const userStore = useUserStore(); // Access the user store directly
   const posts = ref([]);
@@ -16,7 +15,6 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
   const alertTimeout = ref(null);
   const dialog = ref(false);
   const maxFiles = ref(10);
-
   const fetchPosts = async () => {
     const { data: postsData } = await supabase
       .from('posts')
@@ -24,18 +22,15 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       .order('created_at', { ascending: false });
     posts.value = postsData;
   };
-
   const addPost = async (post) => {
     await supabase.from('posts').insert(post);
     await fetchPosts();
   };
-
   const handleCancel = async () => {
     dialog.value = false;
     postContent.value = '';
     previewImages.value = [];
   };
-
   const handleUploadChange = async (event) => {
     const files = event.target.files;
     const fileCount = files.length;
@@ -50,7 +45,6 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       }, 3000);
       return;
     }
-
     // Perform operations for each file
     for (let i = 0; i < fileCount; i++) {
       file.value = files[i];
@@ -64,11 +58,9 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       reader.readAsDataURL(file.value);
     }
   };
-
   const removeImage = async (index) => {
     previewImages.value.splice(index, 1);
   };
-
   const submit = async (router) => {
     loading.value = true;
     const imageUrls = [];
@@ -114,9 +106,7 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
     const username = userStore.user.username;
     router.push(`/profile/${username}`);
   };
-
   const likesCount = ref({});
-
   const likePost = async (postId) => {
     await supabase.from('liked_posts').insert({
       liked_by_id: userStore.user.id,
@@ -124,7 +114,6 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
     });
     likesCount.value[postId]++;
   };
-
   const unlikePost = async (postId) => {
     await supabase
       .from('liked_posts')
@@ -133,7 +122,6 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       .eq('liked_post_id', postId);
     likesCount.value[postId]--;
   };
-
   const countLikes = async (postId) => {
     const { count } = await supabase
       .from('liked_posts')
@@ -141,7 +129,6 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       .eq('liked_post_id', postId);
     likesCount.value[postId] = count;
   };
-
   const formattedLikesCount = computed(() => {
     return (postId) => {
       const count = likesCount.value[postId];
@@ -154,14 +141,12 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       }
     };
   });
-
   const savePost = async (postId) => {
     await supabase.from('saved_posts').insert({
       saved_by_id: userStore.user.id,
       saved_post_id: postId,
     });
   };
-
   const unsavePost = async (postId) => {
     await supabase
       .from('saved_posts')
@@ -169,7 +154,6 @@ export const usePostStore = defineStore('post', (/* provide, options */) => {
       .eq('saved_by_id', userStore.user.id)
       .eq('saved_post_id', postId);
   };
-
   return {
     fetchPosts,
     addPost,

@@ -8,7 +8,6 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { useRoute } from 'vue-router';
 import { v4 as uuidv4 } from 'uuid';
-
 const dialog = ref(false);
 const selectedPost = ref({});
 const model = ref(0);
@@ -18,17 +17,12 @@ const imagesToRemove = ref([]);
 const imagesToAdd = ref([]);
 const exceedsLimitError = ref(false);
 const loading = ref(false);
-
 const route = useRoute();
-
 const userStore = useUserStore();
 const user = toRef(userStore, 'user');
 const { username: profileUsername } = route.params;
-
 const postStore = usePostStore();
-
 dayjs.extend(relativeTime);
-
 const props = defineProps({
   selectedPost: Object,
   postMainImage: String,
@@ -58,18 +52,14 @@ const updatePost = async () => {
       post_content: selectedPost.value.post_content,
     })
     .eq('id', selectedPost.value.id);
-
   if (error) {
     loading.value = false;
     throw new Error(error.message);
   }
-
   const newImageUrls = []; // Array to store new image URLs
-
   for (const image of imagesToAdd.value) {
     const fileName = uuidv4();
     const fileData = image.split(',')[1]; // Extract the base64-encoded file data
-
     // Convert the base64-encoded file data to a Blob object
     const byteCharacters = atob(fileData);
     const byteArrays = [];
@@ -83,23 +73,18 @@ const updatePost = async () => {
       byteArrays.push(byteArray);
     }
     const blob = new Blob(byteArrays, { type: 'image/jpeg' }); // Modify the type if necessary
-
     // Upload the image to the storage
     const { data: imageData, error: imageError } = await supabase.storage
       .from('images')
       .upload(`public/${fileName}.jpg`, blob); // Modify the file extension if necessary
-
     if (imageError) {
       loading.value = false;
       throw new Error('Unable to upload image');
     }
-
     newImageUrls.push(imageData.path); // Store the new image URL
   }
-
   // Combine the existing and new image URLs
   const updatedImageUrls = [...selectedPost.value.image_urls, ...newImageUrls];
-
   // Update the post with the new image URLs
   const { data: updatedData, error: updatedError } = await supabase
     .from('posts')
@@ -107,29 +92,22 @@ const updatePost = async () => {
       image_urls: updatedImageUrls,
     })
     .eq('id', selectedPost.value.id);
-
   if (updatedError) {
     loading.value = false;
     throw new Error(updatedError.message);
   }
-
   // Remove images from selectedPost.image_urls
   selectedPost.value.image_urls = selectedPost.value.image_urls.filter(
     (imageUrl) => !imagesToRemove.value.includes(imageUrl)
   );
-
   // Add newly uploaded image URLs to selectedPost.image_urls
   selectedPost.value.image_urls.push(...newImageUrls);
-
   // Clear the imagesToRemove and imagesToAdd lists
   imagesToRemove.value = [];
   imagesToAdd.value = [];
-
   loading.value = false;
-
   editMode.value = false; // Exit edit mode
 };
-
 const deletePost = async () => {
   const postId = selectedPost.value.id; // Get the ID of the selected post
   const { data, error } = await supabase
@@ -141,41 +119,32 @@ const deletePost = async () => {
   }
   location.reload();
 };
-
 const formatPostContent = (content) => {
   if (!content) {
     return '';
   }
-
   const hashtagRegex = /#(\w+)/g;
   const mentionRegex = /@(\w+)/g;
-
   const postContent = content
     .replace(hashtagRegex, '<a href="/tags/$1" class="text-sky-800">#$1</a>')
     .replace(mentionRegex, '<a href="/profile/$1" class="text-sky-800">@$1</a>')
     .replace(/\n/g, '<br>');
-
   return postContent;
 };
-
 const addToRemoveList = (imageUrl, index) => {
   imagesToRemove.value.push(imageUrl);
   selectedPost.value.image_urls.splice(index, 1); // Remove the image URL from the array
 };
-
 const restoreRemovedImages = () => {
   selectedPost.value.image_urls.push(...imagesToRemove.value);
   imagesToRemove.value = [];
 };
-
 const clearRemoveList = () => {
   imagesToRemove.value = [];
 };
-
 const handleImageSelection = (event) => {
   const files = event.target.files; // Get the selected files
   const allowedImages = 10 - selectedPost.value.image_urls.length;
-
   if (totalImages.value >= 10) {
     exceedsLimitError.value = true; // Set the value of exceedsLimitError to true
     setTimeout(() => {
@@ -183,16 +152,13 @@ const handleImageSelection = (event) => {
     }, 3000);
     return;
   }
-
   for (let i = 0; i < files.length; i++) {
     if (imagesToAdd.value.length >= allowedImages) {
       // Maximum limit reached, do not add more images
       break;
     }
-
     const file = files[i];
     // Perform any necessary validations on the file (e.g., file size, file type) here
-
     // Convert the file to a Base64 data URL
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -205,31 +171,25 @@ const handleImageSelection = (event) => {
     reader.readAsDataURL(file);
   }
 };
-
 const removeFromAddList = (index) => {
   imagesToAdd.value.splice(index, 1); // Remove the image URL from the array
 };
-
 const totalImages = computed(() => {
   if (selectedPost.value && imagesToAdd.value) {
     return selectedPost.value.image_urls.length + imagesToAdd.value.length;
   }
   return 0;
 });
-
 const exceedsLimit = computed(() => {
   return exceedsLimitError.value;
 });
-
 const clearExceedsLimitError = () => {
   exceedsLimit.value = false;
 };
-
 const clearImagesToAdd = () => {
   imagesToAdd.value = [];
 };
 </script>
-
 <template>
   <v-img
     :src="`${imagePath}${postMainImage}`"
@@ -246,19 +206,22 @@ const clearImagesToAdd = () => {
         ></v-progress-circular>
       </v-row>
     </template>
-    <button
-      icon
-      class="edit-button"
-      @click="editPost(selectedPost)"
-      v-if="props.user.username === userStore.user.username"
-    >
-      <v-icon icon="fa-solid fa-pen-to-square fa-sm"></v-icon>
-    </button>
+    <div v-if="props.user && userStore.user">
+      <button
+        icon
+        class="edit-button"
+        @click="editPost(selectedPost)"
+        v-if="props.user.username === userStore.user.username"
+      >
+        <v-icon icon="fa-solid fa-pen-to-square fa-sm"></v-icon>
+      </button>
+    </div>
+    <div v-else></div>
   </v-img>
   <v-dialog v-model="dialog" fullscreen>
-    <v-card v-if="selectedPost">
+    <v-card v-if="selectedPost" class="md:flex md:flex-col md:items-center">
       <div
-        class="xl:h-full xl:overflow-y-auto xl:flex xl:flex-row xl:justify-center"
+        class="md:h-5/6 xl:h-4/5 xl:w-1/2 xl:mt-10 xl:overflow-y-auto xl:flex xl:flex-row"
       >
         <div v-if="editMode" class="lg:w-full xl:w-1/2">
           <div v-if="loading" class="spinner">
@@ -325,12 +288,11 @@ const clearImagesToAdd = () => {
             </div>
           </div>
         </div>
-
         <v-carousel
           v-else
           v-model="model"
           hide-delimiter-background
-          class="w-full h-full xl:w-2/5"
+          class="md:h-full xl:h-full"
         >
           <v-carousel-item
             v-for="(imageUrl, index) in selectedPost.image_urls"
@@ -345,7 +307,7 @@ const clearImagesToAdd = () => {
             />
           </v-carousel-item>
         </v-carousel>
-        <div class="post-details flex flex-col mt-4 mb-4 xl:w-2/5 lg:ml-4">
+        <div class="post-details flex flex-col mt-4 xl:w-2/5 lg:ml-4">
           <div class="flex flex-row items-center mx-5 mt-2 mb-4">
             <img
               :key="user.id"
@@ -367,7 +329,6 @@ const clearImagesToAdd = () => {
             ></v-icon>
           </div>
           <div class="border border-slate-200 mb-3"></div>
-
           <template v-if="editMode">
             <v-textarea
               v-model="selectedPost.post_content"
@@ -377,7 +338,6 @@ const clearImagesToAdd = () => {
               class="mx-3 l:mx-0 text-sm"
             ></v-textarea>
           </template>
-
           <template v-else>
             <div class="mx-5 mb-5">
               <span class="mr-1 font-bold text-sm">{{
@@ -389,8 +349,7 @@ const clearImagesToAdd = () => {
               ></span>
             </div>
           </template>
-
-          <div class="mb-4 ml-2 lg:ml-0 mt-auto">
+          <div class="mb-1 ml-2 lg:ml-0 mt-auto">
             <template
               v-if="editMode && props.user.username === userStore.user.username"
             >
@@ -431,13 +390,21 @@ const clearImagesToAdd = () => {
                 >
               </div>
             </template>
+            <template
+              v-if="
+                !editMode && props.user.username !== userStore.user.username
+              "
+            >
+              <div>
+                <PostActions :post="props.selectedPost" />
+              </div>
+            </template>
           </div>
         </div>
       </div>
     </v-card>
   </v-dialog>
 </template>
-
 <style scoped>
 .dialog-bottom-transition-enter-active,
 .dialog-bottom-transition-leave-active {
@@ -446,7 +413,6 @@ const clearImagesToAdd = () => {
 input {
   margin-top: 10px;
 }
-
 .custom-button {
   display: inline-block;
   padding: 10px 20px;
@@ -455,13 +421,11 @@ input {
   border-radius: 4px;
   cursor: pointer;
 }
-
 .file-input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
-
 .spinner {
   display: flex;
   align-items: center;
