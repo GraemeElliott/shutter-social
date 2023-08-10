@@ -21,6 +21,7 @@ const onSearch = () => {
 
 const handleLogOut = async () => {
   await userStore.handleLogout();
+  router.push(`/`);
 };
 </script>
 <template>

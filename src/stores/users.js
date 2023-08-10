@@ -163,10 +163,6 @@ export const useUserStore = defineStore('users', () => {
   const handleLogout = async () => {
     await supabase.auth.signOut();
     user.value = null;
-
-    const router = useRouter();
-
-    router.push('/');
   };
 
   return {
