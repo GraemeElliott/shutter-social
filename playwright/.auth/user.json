@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "sb-rvjzuxzmskcedxpwkuae-auth-token",
+          "value": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6IktUZWthZFdVUkd0YmkvblgiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNjkzMDEyOTMyLCJpYXQiOjE2OTMwMDkzMzIsImlzcyI6Imh0dHBzOi8vcnZqenV4em1za2NlZHhwd2t1YWUuc3VwYWJhc2UuY28vYXV0aC92MSIsInN1YiI6IjNmNjJmZWM1LTA1OWQtNDI3Mi05MDc3LTNmNWQzMjg2ZWYwNiIsImVtYWlsIjoiaWtlYUBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7fSwicm9sZSI6ImF1dGhlbnRpY2F0ZWQiLCJhYWwiOiJhYWwxIiwiYW1yIjpbeyJtZXRob2QiOiJwYXNzd29yZCIsInRpbWVzdGFtcCI6MTY5MzAwOTMzMn1dLCJzZXNzaW9uX2lkIjoiMDQ4MGJlYTItMDg1MS00MTY1LTlmYWYtMTNjMmI5MGE3NDM5In0.032TA-vqciClPurnne1urxIxqwoud_19jQzuMV6zsks\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1693012933,\"refresh_token\":\"C4nq_Tuca-WHzviY4RXh6g\",\"user\":{\"id\":\"3f62fec5-059d-4272-9077-3f5d3286ef06\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"ikea@gmail.com\",\"email_confirmed_at\":\"2023-08-09T23:22:45.567841Z\",\"phone\":\"\",\"confirmed_at\":\"2023-08-09T23:22:45.567841Z\",\"last_sign_in_at\":\"2023-08-26T00:22:12.254682931Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{},\"identities\":[{\"id\":\"3f62fec5-059d-4272-9077-3f5d3286ef06\",\"user_id\":\"3f62fec5-059d-4272-9077-3f5d3286ef06\",\"identity_data\":{\"email\":\"ikea@gmail.com\",\"sub\":\"3f62fec5-059d-4272-9077-3f5d3286ef06\"},\"provider\":\"email\",\"last_sign_in_at\":\"2023-08-09T23:22:45.566544Z\",\"created_at\":\"2023-08-09T23:22:45.566585Z\",\"updated_at\":\"2023-08-09T23:22:45.566585Z\"}],\"created_at\":\"2023-08-09T23:22:45.564246Z\",\"updated_at\":\"2023-08-26T00:22:12.256161Z\"}}"
+        }
+      ]
+    }
+  ]
+}
